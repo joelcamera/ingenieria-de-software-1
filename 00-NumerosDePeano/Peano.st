@@ -125,7 +125,7 @@ multiplicameA: unNumeroDePeano
 
 	^unNumeroDePeano + (self previous * unNumeroDePeano).! !
 
-!II class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 13:55:16'!
+!II class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:39:28'!
 next
 
 	next ifNil: 
@@ -139,6 +139,10 @@ next
 previous
 	
 	^previous! !
+
+!II class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:41:11'!
+previous: unNumeroDePeano	
+	previous := unNumeroDePeano! !
 
 !II class methodsFor: 'as yet unclassified' stamp: 'jec 3/29/2018 14:38:36'!
 removeAllNext
@@ -171,23 +175,23 @@ DenotativeObject subclass: #III
 III class
 	instanceVariableNames: 'next previous'!
 
-!III class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!III class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 * unNumeroDePeano
 	
 	^ unNumeroDePeano multiplicameA: self.! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!III class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 + unNumeroDePeano
 	
 	^ self previous + unNumeroDePeano next.! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!III class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 - unNumeroDePeano
 
 	^ unNumeroDePeano restameA: self.
 	! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!III class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 / unNumeroDePeano
 
 	[ 
@@ -199,27 +203,27 @@ III class
 		do: [self error: self descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor ].
 	! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!III class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 cleanNext
 
 	next := nil.! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!III class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor
 	
 	^'No se puede dividir por un numero mayor'.! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!III class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 descripcionDeErrorDeNumerosNegativosNoSoportados
 
 	^'Numeros menores o iguales a cero no soportados.'! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!III class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 multiplicameA: unNumeroDePeano
 
 	^unNumeroDePeano + (self previous * unNumeroDePeano).! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!III class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 next
 
 	next ifNil: 
@@ -229,12 +233,16 @@ next
 	].
 	^next.! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!III class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 previous
 	
 	^previous! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!III class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
+previous: unNumeroDePeano	
+	previous := unNumeroDePeano! !
+
+!III class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 removeAllNext
 	
 	next ifNotNil:
@@ -244,7 +252,7 @@ removeAllNext
 		next := nil.
 	]! !
 
-!III class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!III class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 restameA: unNumeroDePeano
 
 	^unNumeroDePeano previous - self previous! !
@@ -265,23 +273,23 @@ DenotativeObject subclass: #IIII
 IIII class
 	instanceVariableNames: 'next previous'!
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 * unNumeroDePeano
 	
 	^ unNumeroDePeano multiplicameA: self.! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 + unNumeroDePeano
 	
 	^ self previous + unNumeroDePeano next.! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 - unNumeroDePeano
 
 	^ unNumeroDePeano restameA: self.
 	! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 / unNumeroDePeano
 
 	[ 
@@ -293,27 +301,27 @@ IIII class
 		do: [self error: self descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor ].
 	! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 cleanNext
 
 	next := nil.! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 descripcionDeErrorDeNoSePuedeDividirPorUnNumeroMayor
 	
 	^'No se puede dividir por un numero mayor'.! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 descripcionDeErrorDeNumerosNegativosNoSoportados
 
 	^'Numeros menores o iguales a cero no soportados.'! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 multiplicameA: unNumeroDePeano
 
 	^unNumeroDePeano + (self previous * unNumeroDePeano).! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 next
 
 	next ifNil: 
@@ -323,12 +331,16 @@ next
 	].
 	^next.! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 previous
 	
 	^previous! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
+previous: unNumeroDePeano	
+	previous := unNumeroDePeano! !
+
+!IIII class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 removeAllNext
 	
 	next ifNotNil:
@@ -338,7 +350,7 @@ removeAllNext
 		next := nil.
 	]! !
 
-!IIII class methodsFor: 'as yet unclassified' stamp: 'jec 3/30/2018 14:04:06'!
+!IIII class methodsFor: 'as yet unclassified' stamp: 'GAC 4/1/2018 08:43:04'!
 restameA: unNumeroDePeano
 
 	^unNumeroDePeano previous - self previous! !
