@@ -134,7 +134,7 @@ test21DividingFraccionesCanReturnAnEntero
 
 	self assert: oneHalf / oneHalf equals: one! !
 
-!NumeroTest methodsFor: 'tests' stamp: 'HernanWilkinson 5/7/2016 22:43'!
+!NumeroTest methodsFor: 'tests' stamp: 'JEC 4/21/2018 12:33:30'!
 test22DividingEnterosCanReturnAFraccion
 
 	self assert: two / four equals: oneHalf! !
@@ -234,8 +234,9 @@ canNotDivideByZeroErrorDescription
 
 	^'No se puede dividir por cero'! !
 
-!Numero class methodsFor: 'error descriptions' stamp: 'HernanWilkinson 5/7/2016 22:47'!
+!Numero class methodsFor: 'error descriptions' stamp: 'JEC 4/21/2018 13:17:34'!
 invalidNumberTypeErrorDescription
+	
 	^ 'Tipo de numero invalido'! !
 
 
@@ -276,10 +277,10 @@ hash
 	^value hash! !
 
 
-!Entero methodsFor: 'initialization' stamp: 'HernanWilkinson 5/7/2016 20:09'!
-initalizeWith: aValue 
-	
-	value := aValue! !
+!Entero methodsFor: 'initialization' stamp: 'JEC 4/21/2018 12:38:16'!
+initializeWith: aValue
+
+	value _ aValue.! !
 
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'JEC 4/18/2018 22:44:19'!
@@ -297,10 +298,10 @@ initalizeWith: aValue
 	
 	^aDivisor divideInteger: self.! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 21:55'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'JEC 4/21/2018 13:12:18'!
 // aDivisor 
 	
-	^self class with: value // aDivisor integerValue! !
+	^Entero with: value // aDivisor integerValue! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'JEC 4/18/2018 22:56:18'!
 addFraction: aFraction
@@ -309,10 +310,10 @@ addFraction: aFraction
 		with: aFraction numerator + (self * aFraction denominator)
 		over: aFraction denominator.! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'JEC 4/18/2018 22:48:29'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'JEC 4/21/2018 12:30:48'!
 addInteger: anInteger
 
-	^ self class with: value + anInteger integerValue.! !
+	^ Entero with: value + anInteger integerValue.! !
 
 !Entero methodsFor: 'arithmetic operations' stamp: 'JEC 4/18/2018 22:50:28'!
 divideFraction: aFraction
@@ -328,15 +329,15 @@ divideInteger: anInteger
 		with: anInteger
 		over: self.! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'HernanWilkinson 5/7/2016 21:00'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'JEC 4/21/2018 12:36:04'!
 greatestCommonDivisorWith: anEntero 
 	
-	^self class with: (value gcd: anEntero integerValue)! !
+	^Entero with: (value gcd: anEntero integerValue)! !
 
-!Entero methodsFor: 'arithmetic operations' stamp: 'JEC 4/18/2018 22:51:18'!
+!Entero methodsFor: 'arithmetic operations' stamp: 'JEC 4/21/2018 12:38:36'!
 multiplyByInteger: anInteger
 
-	^ self class with: value * anInteger integerValue.! !
+	^ Entero with: value * anInteger integerValue.! !
 
 
 !Entero methodsFor: 'accessing' stamp: 'JEC 4/18/2018 23:00:23'!
@@ -352,13 +353,140 @@ multiplyByFraction: aFraction
 Entero class
 	instanceVariableNames: ''!
 
-!Entero class methodsFor: 'instance creation' stamp: 'HernanWilkinson 5/7/2016 22:53'!
-with: aValue 
+!Entero class methodsFor: 'instance creation' stamp: 'JEC 4/21/2018 13:59:10'!
+with: aValue
 	
 	"Esta verificacion esta puesta por si se equivocan y quieren crear un Entero pasando otra cosa que un Integer - Hernan"
-	aValue isInteger ifFalse: [  self error: 'aValue debe ser anInteger' ].
+	aValue isInteger ifFalse: [ self error: 'aValue debe ser anInteger' ].
 	
-	^self new initalizeWith: aValue! !
+	^ (self subclasses detect: [ :subclass | subclass canHandleEntero: aValue ]) new initializeWith: aValue.! !
+
+
+!classDefinition: #Cero category: #'Numero-Exercise'!
+Entero subclass: #Cero
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numero-Exercise'!
+
+!Cero methodsFor: 'value' stamp: 'JEC 4/21/2018 13:01:42'!
+asDenominator
+
+	self error: self class canNotDivideByZeroErrorDescription.! !
+
+!Cero methodsFor: 'value' stamp: 'JEC 4/21/2018 12:47:19'!
+asNumerator
+	
+	self error: 'una fraccion no puede ser cero'! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Cero class' category: #'Numero-Exercise'!
+Cero class
+	instanceVariableNames: ''!
+
+!Cero class methodsFor: 'handler' stamp: 'JEC 4/21/2018 15:54:55'!
+canHandleEntero: aValue
+
+	^ aValue = 0.! !
+
+!Cero class methodsFor: 'handler' stamp: 'JEC 4/21/2018 14:24:30'!
+canHandleFractionWith: aNumerator over: aDenominator
+
+	^aNumerator class = self! !
+
+
+!Cero class methodsFor: 'instance creation' stamp: 'JEC 4/21/2018 12:27:19'!
+with: aValue
+
+	^self new initializeWith: aValue! !
+
+
+!Cero class methodsFor: 'private' stamp: 'JEC 4/21/2018 15:55:10'!
+initializeFractionWith: aNumerator over: aDenominator
+ 
+	^aNumerator! !
+
+
+!classDefinition: #NiUnoNiCero category: #'Numero-Exercise'!
+Entero subclass: #NiUnoNiCero
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numero-Exercise'!
+
+!NiUnoNiCero methodsFor: 'value' stamp: 'JEC 4/21/2018 12:50:19'!
+asDenominator
+
+	^self! !
+
+!NiUnoNiCero methodsFor: 'value' stamp: 'JEC 4/21/2018 12:47:11'!
+asNumerator
+
+	^self! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'NiUnoNiCero class' category: #'Numero-Exercise'!
+NiUnoNiCero class
+	instanceVariableNames: ''!
+
+!NiUnoNiCero class methodsFor: 'handler' stamp: 'JEC 4/21/2018 16:00:54'!
+canHandleEntero: aValue
+
+	^ aValue ~= 0 and: [aValue ~= 1].! !
+
+
+!NiUnoNiCero class methodsFor: 'instance creation' stamp: 'JEC 4/21/2018 12:27:39'!
+with: aValue
+
+	^self new initializeWith: aValue! !
+
+
+!classDefinition: #Uno category: #'Numero-Exercise'!
+Entero subclass: #Uno
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Numero-Exercise'!
+
+!Uno methodsFor: 'value' stamp: 'JEC 4/21/2018 12:48:06'!
+asDenominator
+
+	self error: 'una fraccion no puede tener denominador 1 porque sino es un entero'! !
+
+!Uno methodsFor: 'value' stamp: 'JEC 4/21/2018 12:49:54'!
+asNumerator
+	
+	^self! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Uno class' category: #'Numero-Exercise'!
+Uno class
+	instanceVariableNames: ''!
+
+!Uno class methodsFor: 'handler' stamp: 'JEC 4/21/2018 16:01:40'!
+canHandleEntero: aValue
+
+	^ aValue = 1.! !
+
+!Uno class methodsFor: 'handler' stamp: 'JEC 4/21/2018 15:35:43'!
+canHandleFractionWith: aNumerator over: aDenominator 
+
+	^aDenominator class = self! !
+
+
+!Uno class methodsFor: 'instance creation' stamp: 'JEC 4/21/2018 12:27:49'!
+with: aValue
+
+	^self new initializeWith: aValue! !
+
+
+!Uno class methodsFor: 'private' stamp: 'JEC 4/21/2018 15:36:23'!
+initializeFractionWith: aNumerator over: aDenominator
+ 
+	^aNumerator.! !
 
 
 !classDefinition: #Fraccion category: #'Numero-Exercise'!
@@ -379,15 +507,11 @@ isZero
 	^false! !
 
 
-!Fraccion methodsFor: 'initialization' stamp: 'HernanWilkinson 5/7/2016 22:54'!
+!Fraccion methodsFor: 'initialization' stamp: 'JEC 4/21/2018 12:51:39'!
 initializeWith: aNumerator over: aDenominator
-
-	"Estas precondiciones estan por si se comenten errores en la implementacion - Hernan"
-	aNumerator isZero ifTrue: [ self error: 'una fraccion no puede ser cero' ].
-	aDenominator isOne ifTrue: [ self error: 'una fraccion no puede tener denominador 1 porque sino es un entero' ].
 	
-	numerator := aNumerator.
-	denominator := aDenominator ! !
+	numerator := aNumerator asNumerator.
+	denominator := aDenominator asDenominator.! !
 
 
 !Fraccion methodsFor: 'comparing' stamp: 'HernanWilkinson 5/7/2016 20:42'!
@@ -416,12 +540,12 @@ hash
 
 	^ aDivisor divideFraction: self.! !
 
-!Fraccion methodsFor: 'arithmetic operations' stamp: 'JEC 4/18/2018 22:52:55'!
+!Fraccion methodsFor: 'arithmetic operations' stamp: 'JEC 4/21/2018 13:09:21'!
 addFraction: aFraction
 
 	| newNumerator newDenominator |
 	
-	newNumerator _ numerator * aFraction denominator + (denominator * aFraction numerator).
+	newNumerator _ (numerator * aFraction denominator) + (denominator * aFraction numerator).
 	newDenominator _ denominator * aFraction denominator.
 	
 	^ newNumerator / newDenominator.! !
@@ -474,19 +598,29 @@ numerator
 Fraccion class
 	instanceVariableNames: ''!
 
-!Fraccion class methodsFor: 'intance creation' stamp: 'HernanWilkinson 5/7/2016 20:41'!
+!Fraccion class methodsFor: 'instance creation' stamp: 'JEC 4/21/2018 15:58:45'!
 with: aDividend over: aDivisor
 
-	| greatestCommonDivisor numerator denominator |
-	
-	aDivisor isZero ifTrue: [ self error: self canNotDivideByZeroErrorDescription ].
-	aDividend isZero ifTrue: [ ^aDividend ].
+	| greatestCommonDivisor numerator denominator classes classToInstantiate |
 	
 	greatestCommonDivisor := aDividend greatestCommonDivisorWith: aDivisor. 
 	numerator := aDividend // greatestCommonDivisor.
 	denominator := aDivisor // greatestCommonDivisor.
-	
-	denominator isOne ifTrue: [ ^numerator ].
 
-	^self new initializeWith: numerator over: denominator
-	! !
+	classes := OrderedCollection with: Cero with: Uno with: Fraccion.
+	classToInstantiate := classes detect: [:aClass | aClass canHandleFractionWith: numerator over: denominator].
+	
+	 ^classToInstantiate initializeFractionWith: numerator over: denominator.
+! !
+
+
+!Fraccion class methodsFor: 'handler' stamp: 'JEC 4/21/2018 15:42:55'!
+canHandleFractionWith: aNumerator over: aDenominator
+ 
+	^(aNumerator class ~= Cero) and: [aDenominator class ~= Uno]! !
+
+
+!Fraccion class methodsFor: 'private' stamp: 'JEC 4/21/2018 15:43:57'!
+initializeFractionWith: aNumerator over: aDenominator
+
+	^self new initializeWith: aNumerator over: aDenominator.! !
