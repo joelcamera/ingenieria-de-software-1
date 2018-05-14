@@ -1193,32 +1193,22 @@ investmentNetOf: anAccount
 		into: [ :sum :aTransaction | sum + aTransaction value ]! !
 
 
-!XXX methodsFor: 'portfolio' stamp: 'JEC 5/13/2018 21:02:32'!
+!XXX methodsFor: 'portfolio' stamp: 'JEC 5/13/2018 22:48:16'!
 portofolioTreeOf: aPortfolio namingAccountWith: accountNames 
 
 	| names |
 	
 	names := OrderedCollection new.
-
 	aPortfolio getDFOWithNames: accountNames withSpace: '' in: names.
 
-"	names add: (accountNames at: aPortfolio).
-	
-	aPortfolio accounts do: [:account | self getDFOOfPortfolio: account withNames: accountNames in: names withSpace: ' ']."
-	
 	^names.! !
 
-!XXX methodsFor: 'portfolio' stamp: 'JEC 5/13/2018 21:16:20'!
+!XXX methodsFor: 'portfolio' stamp: 'JEC 5/13/2018 22:48:13'!
 reversePortofolioTreeOf: aPortfolio namingAccountWith: accountNames
 
 	| names |
 	
 	names := OrderedCollection new.
-
 	aPortfolio getReverseDFOWithNames: accountNames withSpace: '' in: names.
-	
-	"aPortfolio accounts reverseDo: [:account | self getReverseDFOOfPortfolio: account withNames: accountNames in: names withSpace: ' '].
-	
-	names add: (accountNames at: aPortfolio)."
-	
+
 	^names.! !
