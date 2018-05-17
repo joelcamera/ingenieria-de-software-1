@@ -512,33 +512,33 @@ test29ReversePortfolioTreePrinterPrintsTheCompositeStartingFromTheLeaves
 	self assert: 'composedPortfolio' = (lines at: 5).! !
 
 
-!PortfolioTest methodsFor: 'test support' stamp: 'JEC 5/14/2018 22:49:52'!
+!PortfolioTest methodsFor: 'test support' stamp: 'GAC 5/17/2018 01:26:14'!
 accountSummaryLinesOf: aReceptiveAccount
-	^ (AccountSummaryQuery of: aReceptiveAccount) value.! !
+	^ (AccountSummary of: aReceptiveAccount) value.! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'JEC 5/14/2018 22:50:49'!
+!PortfolioTest methodsFor: 'test support' stamp: 'GAC 5/17/2018 01:44:12'!
 accountTransferNetOf: aReceptiveAccount
-	^ (TransferNetQuery of: aReceptiveAccount) value.! !
+	^ (TransferNet of: aReceptiveAccount) value.! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'JEC 5/14/2018 22:50:05'!
+!PortfolioTest methodsFor: 'test support' stamp: 'GAC 5/17/2018 01:25:59'!
 investmentEarningsOf: aReceptiveAccount
-	^ (InvestmentEarningsQuery of: aReceptiveAccount) value.! !
+	^ (InvestmentEarnings of: aReceptiveAccount) value.! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'JEC 5/14/2018 22:50:25'!
+!PortfolioTest methodsFor: 'test support' stamp: 'GAC 5/17/2018 01:25:43'!
 investmentNetOf: aReceptiveAccount
-	^ (InvestmentNetQuery of: aReceptiveAccount) value.! !
+	^ (InvestmentNet of: aReceptiveAccount) value.! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'JEC 5/14/2018 22:50:36'!
+!PortfolioTest methodsFor: 'test support' stamp: 'GAC 5/17/2018 01:29:59'!
 portofolioTreeOf: aPortfolio namingAccountWith: dictionaryNames
-	^ (PortfolioTreePrinterQuery
+	^ (PortfolioTreePrinter
 		of: aPortfolio
 		with: dictionaryNames) value.! !
 
-!PortfolioTest methodsFor: 'test support' stamp: 'JEC 5/14/2018 22:50:36'!
+!PortfolioTest methodsFor: 'test support' stamp: 'GAC 5/17/2018 01:50:14'!
 reversePortofolioTreeOf: aPortfolio namingAccountWith: dictionaryNames
-	^ (PortfolioTreePrinterQuery
+	^ (ReversePortfolioTreePrinter
 		of: aPortfolio
-		with: dictionaryNames) reversedValue.! !
+		with: dictionaryNames) value.! !
 
 
 !classDefinition: #AccountTransaction category: #'PortfolioTreePrinter-Ejercicio'!
@@ -548,10 +548,9 @@ Object subclass: #AccountTransaction
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!AccountTransaction methodsFor: 'value' stamp: 'JEC 5/13/2018 14:26:52'!
-modifyBalance: aValue
-
-	self subclassResponsibility ! !
+!AccountTransaction methodsFor: 'value' stamp: 'GAC 5/17/2018 01:45:09'!
+affectBalance: aValue
+	self subclassResponsibility.! !
 
 !AccountTransaction methodsFor: 'value' stamp: 'JEC 5/14/2018 22:58:22'!
 sendValueTo: aQueryObject
@@ -562,6 +561,7 @@ sendValueTo: aQueryObject
 value
 
 	self subclassResponsibility ! !
+
 
 
 !classDefinition: #CertificateOfDeposit category: #'PortfolioTreePrinter-Ejercicio'!
@@ -580,15 +580,30 @@ initializeFor: aValue during: anAmountOfDays at: aPercentage on: anAccount
 	account  := anAccount.! !
 
 
-!CertificateOfDeposit methodsFor: 'value' stamp: 'JEC 5/13/2018 15:41:25'!
-modifyBalance: aBalanceValue
+!CertificateOfDeposit methodsFor: 'value' stamp: 'GAC 5/17/2018 01:45:09'!
+affectBalance: aBalanceValue
+	^ aBalanceValue - value.! !
 
-	^aBalanceValue - value! !
+!CertificateOfDeposit methodsFor: 'value' stamp: 'JEC 5/13/2018 15:08:45'!
+numberOfDays
+
+	^numberOfDays ! !
 
 !CertificateOfDeposit methodsFor: 'value' stamp: 'JEC 5/14/2018 23:07:42'!
 sendValueTo: aQueryObject
 
 	aQueryObject certificateOfDepositQueryWithValue: value numberOfDays: numberOfDays andTna: tna.! !
+
+!CertificateOfDeposit methodsFor: 'value' stamp: 'JEC 5/13/2018 15:08:53'!
+tna
+
+	^tna! !
+
+!CertificateOfDeposit methodsFor: 'value' stamp: 'JEC 5/13/2018 14:58:11'!
+value
+
+	^value ! !
+
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -621,10 +636,9 @@ initializeFor: aValue
 	self subclassResponsibility ! !
 
 
-!Deposit methodsFor: 'value' stamp: 'JEC 5/13/2018 14:16:20'!
-modifyBalance: aBalanceValue
-	
-	self subclassResponsibility ! !
+!Deposit methodsFor: 'value' stamp: 'GAC 5/17/2018 01:46:37'!
+affectBalance: aBalanceValue
+	self subclassResponsibility.! !
 
 !Deposit methodsFor: 'value' stamp: 'JEC 5/14/2018 23:29:47'!
 sendValueTo: aQueryObject
@@ -635,6 +649,7 @@ sendValueTo: aQueryObject
 value
 
 	self subclassResponsibility ! !
+
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -665,16 +680,16 @@ Deposit subclass: #DepositSimple
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
+
 !DepositSimple methodsFor: 'initialization' stamp: 'JEC 5/13/2018 14:12:36'!
 initializeFor: aValue
 
 	value := aValue ! !
 
 
-!DepositSimple methodsFor: 'value' stamp: 'JEC 5/13/2018 14:16:04'!
-modifyBalance: aBalanceValue
-	
-	^aBalanceValue + value! !
+!DepositSimple methodsFor: 'value' stamp: 'GAC 5/17/2018 01:46:37'!
+affectBalance: aBalanceValue
+	^ aBalanceValue + value.! !
 
 !DepositSimple methodsFor: 'value' stamp: 'JEC 5/14/2018 23:02:46'!
 sendValueTo: aQueryObject
@@ -700,15 +715,9 @@ initializeFor: aTransfer
 	transfer := aTransfer .! !
 
 
-!DepositTransfer methodsFor: 'value' stamp: 'JEC 5/10/2018 21:02:38'!
-modifyBalance: aBalanceValue
- 
-	^aBalanceValue + transfer value! !
-
-!DepositTransfer methodsFor: 'value' stamp: 'JEC 5/13/2018 16:26:05'!
-modifyNetValue: aNetValue
-
-	^aNetValue + transfer value! !
+!DepositTransfer methodsFor: 'value' stamp: 'GAC 5/17/2018 01:46:37'!
+affectBalance: aBalanceValue
+	^ aBalanceValue + transfer value.! !
 
 !DepositTransfer methodsFor: 'value' stamp: 'JEC 5/14/2018 23:04:29'!
 sendValueTo: aQueryObject
@@ -724,6 +733,7 @@ transfer
 value
 
 	^transfer value! !
+
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -755,10 +765,9 @@ initializeFor: aValue
 	self subclassResponsibility ! !
 
 
-!Withdraw methodsFor: 'value' stamp: 'JEC 5/13/2018 14:06:12'!
-modifyBalance: aBalanceValue
- 
-	self subclassResponsibility ! !
+!Withdraw methodsFor: 'value' stamp: 'GAC 5/17/2018 01:47:44'!
+affectBalance: aBalanceValue
+	self subclassResponsibility.! !
 
 !Withdraw methodsFor: 'value' stamp: 'JEC 5/14/2018 23:29:57'!
 sendValueTo: aQueryObject
@@ -769,6 +778,7 @@ sendValueTo: aQueryObject
 value
 
 	self subclassResponsibility! !
+
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -799,10 +809,10 @@ Withdraw subclass: #WithdrawSimple
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!WithdrawSimple methodsFor: 'value' stamp: 'JEC 5/13/2018 14:05:45'!
-modifyBalance: aBalanceValue
- 
-	^aBalanceValue - value! !
+
+!WithdrawSimple methodsFor: 'value' stamp: 'GAC 5/17/2018 01:47:44'!
+affectBalance: aBalanceValue
+	^ aBalanceValue - value.! !
 
 !WithdrawSimple methodsFor: 'value' stamp: 'JEC 5/14/2018 23:04:15'!
 sendValueTo: aQueryObject
@@ -834,15 +844,10 @@ initializeFor: aTransfer
 	transfer := aTransfer.! !
 
 
-!WithdrawTransfer methodsFor: 'value' stamp: 'JEC 5/10/2018 21:01:09'!
-modifyBalance: aBalanceValue
- 
-	^aBalanceValue - transfer value! !
 
-!WithdrawTransfer methodsFor: 'value' stamp: 'JEC 5/13/2018 16:25:33'!
-modifyNetValue: aNetValue
-
-	^aNetValue - transfer value! !
+!WithdrawTransfer methodsFor: 'value' stamp: 'GAC 5/17/2018 01:47:44'!
+affectBalance: aBalanceValue
+	^ aBalanceValue - transfer value.! !
 
 !WithdrawTransfer methodsFor: 'value' stamp: 'JEC 5/14/2018 23:03:53'!
 sendValueTo: aQueryObject
@@ -876,14 +881,39 @@ with: aTransfer
 	^ withdrawTransferInstance.! !
 
 
-!classDefinition: #PortfolioTreePrinterQuery category: #'PortfolioTreePrinter-Ejercicio'!
-Object subclass: #PortfolioTreePrinterQuery
+!classDefinition: #PortfolioQuery category: #'PortfolioTreePrinter-Ejercicio'!
+Object subclass: #PortfolioQuery
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+
+!PortfolioQuery methodsFor: 'value' stamp: 'GAC 5/17/2018 01:33:46'!
+value
+
+	self subclassResponsibility ! !
+
+
+!PortfolioQuery methodsFor: 'handlers' stamp: 'GAC 5/17/2018 01:31:54'!
+accountQuery: anAccount
+
+	self subclassResponsibility! !
+
+!PortfolioQuery methodsFor: 'handlers' stamp: 'GAC 5/17/2018 01:32:10'!
+portfolioQuery: aPortfolio
+
+	self subclassResponsibility ! !
+
+
+!classDefinition: #PortfolioTreePrinter category: #'PortfolioTreePrinter-Ejercicio'!
+PortfolioQuery subclass: #PortfolioTreePrinter
 	instanceVariableNames: 'portfolio dictionaryNames dfoTree strSpaceHeight'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!PortfolioTreePrinterQuery methodsFor: 'initialization' stamp: 'JEC 5/14/2018 23:25:48'!
+!PortfolioTreePrinter methodsFor: 'initialization' stamp: 'JEC 5/14/2018 23:25:48'!
 initializeWith: aPortfolio andNames: aDictionaryNames
 
 	portfolio := aPortfolio.
@@ -892,12 +922,7 @@ initializeWith: aPortfolio andNames: aDictionaryNames
 	strSpaceHeight := ''.! !
 
 
-!PortfolioTreePrinterQuery methodsFor: 'value' stamp: 'JEC 5/14/2018 20:26:03'!
-reversedValue
-
-	^self value reversed! !
-
-!PortfolioTreePrinterQuery methodsFor: 'value' stamp: 'JEC 5/14/2018 22:56:59'!
+!PortfolioTreePrinter methodsFor: 'value' stamp: 'JEC 5/14/2018 22:56:59'!
 value
 
 	portfolio sendValueTo: self.
@@ -905,12 +930,12 @@ value
 	^dfoTree ! !
 
 
-!PortfolioTreePrinterQuery methodsFor: 'handlers' stamp: 'JEC 5/14/2018 23:20:25'!
+!PortfolioTreePrinter methodsFor: 'handlers' stamp: 'JEC 5/14/2018 23:20:25'!
 accountQuery: anAccount
 
 	dfoTree add: strSpaceHeight , (dictionaryNames at: anAccount).! !
 
-!PortfolioTreePrinterQuery methodsFor: 'handlers' stamp: 'JEC 5/14/2018 23:21:18'!
+!PortfolioTreePrinter methodsFor: 'handlers' stamp: 'JEC 5/14/2018 23:21:18'!
 portfolioQuery: aPortfolio
 
 	| oldHeight |
@@ -924,87 +949,87 @@ portfolioQuery: aPortfolio
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'PortfolioTreePrinterQuery class' category: #'PortfolioTreePrinter-Ejercicio'!
-PortfolioTreePrinterQuery class
+!classDefinition: 'PortfolioTreePrinter class' category: #'PortfolioTreePrinter-Ejercicio'!
+PortfolioTreePrinter class
 	instanceVariableNames: ''!
 
-!PortfolioTreePrinterQuery class methodsFor: 'instance creation' stamp: 'JEC 5/14/2018 19:22:23'!
+!PortfolioTreePrinter class methodsFor: 'instance creation' stamp: 'JEC 5/14/2018 19:22:23'!
 of: aPortfolio with: names
 
 	^self new initializeWith: aPortfolio andNames: names.! !
 
 
-!classDefinition: #Query category: #'PortfolioTreePrinter-Ejercicio'!
-Object subclass: #Query
+!classDefinition: #ReceptiveAccountQuery category: #'PortfolioTreePrinter-Ejercicio'!
+Object subclass: #ReceptiveAccountQuery
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!Query methodsFor: 'initialization' stamp: 'JEC 5/14/2018 23:22:59'!
+!ReceptiveAccountQuery methodsFor: 'initialization' stamp: 'JEC 5/14/2018 23:22:59'!
 initializeWith: aReceptiveAccount
 
 	self subclassResponsibility ! !
 
 
-!Query methodsFor: 'value' stamp: 'JEC 5/14/2018 23:23:07'!
+!ReceptiveAccountQuery methodsFor: 'value' stamp: 'JEC 5/14/2018 23:23:07'!
 value
 
 	self subclassResponsibility ! !
 
 
-!Query methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:14:19'!
+!ReceptiveAccountQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:14:19'!
 certificateOfDepositQueryWithValue: aValue numberOfDays: numberOfDays andTna: tna
 
 	self subclassResponsibility ! !
 
-!Query methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:14:42'!
+!ReceptiveAccountQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:14:42'!
 depositSimpleQuery: aValue
 
 	self subclassResponsibility ! !
 
-!Query methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:14:46'!
+!ReceptiveAccountQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:14:46'!
 depositTransferQuery: aValue
 
 	self subclassResponsibility ! !
 
-!Query methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:14:49'!
+!ReceptiveAccountQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:14:49'!
 withdrawSimpleQuery: aValue
 
 	self subclassResponsibility ! !
 
-!Query methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:14:53'!
+!ReceptiveAccountQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:14:53'!
 withdrawTransferQuery: aValue
 
 	self subclassResponsibility ! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Query class' category: #'PortfolioTreePrinter-Ejercicio'!
-Query class
+!classDefinition: 'ReceptiveAccountQuery class' category: #'PortfolioTreePrinter-Ejercicio'!
+ReceptiveAccountQuery class
 	instanceVariableNames: ''!
 
-!Query class methodsFor: 'instance creation' stamp: 'JEC 5/14/2018 23:12:35'!
+!ReceptiveAccountQuery class methodsFor: 'instance creation' stamp: 'JEC 5/14/2018 23:12:35'!
 of: aReceptiveAccount 
 
 	^self new initializeWith: aReceptiveAccount .! !
 
 
-!classDefinition: #AccountSummaryQuery category: #'PortfolioTreePrinter-Ejercicio'!
-Query subclass: #AccountSummaryQuery
+!classDefinition: #AccountSummary category: #'PortfolioTreePrinter-Ejercicio'!
+ReceptiveAccountQuery subclass: #AccountSummary
 	instanceVariableNames: 'account lines'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!AccountSummaryQuery methodsFor: 'initialization' stamp: 'JEC 5/14/2018 18:31:25'!
+!AccountSummary methodsFor: 'initialization' stamp: 'JEC 5/14/2018 18:31:25'!
 initializeWith: aReceptiveAccount
 
 	account := aReceptiveAccount.
 	lines := OrderedCollection new! !
 
 
-!AccountSummaryQuery methodsFor: 'value' stamp: 'JEC 5/14/2018 22:56:27'!
+!AccountSummary methodsFor: 'value' stamp: 'JEC 5/14/2018 22:56:27'!
 value
 
 	account transactionsDo: [ :aTransaction | aTransaction sendValueTo: self ].
@@ -1012,7 +1037,7 @@ value
 	^lines.! !
 
 
-!AccountSummaryQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:08:01'!
+!AccountSummary methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:08:01'!
 certificateOfDepositQueryWithValue: aValue numberOfDays: numberOfDays andTna: tna
 
 	| tnaPercentage |
@@ -1021,46 +1046,46 @@ certificateOfDepositQueryWithValue: aValue numberOfDays: numberOfDays andTna: tn
 
 	lines add: 'Plazo fijo por ', aValue asString, ' durante ', numberOfDays asString, ' dias a una tna de ', tnaPercentage asString, '%'.! !
 
-!AccountSummaryQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:03:18'!
+!AccountSummary methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:03:18'!
 depositSimpleQuery: aValue
 
 	lines add: 'Deposito por ', aValue asString.! !
 
-!AccountSummaryQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:05:04'!
+!AccountSummary methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:05:04'!
 depositTransferQuery: aValue
 
 	lines add: 'Transferencia por ', aValue asString.! !
 
-!AccountSummaryQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:03:24'!
+!AccountSummary methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:03:24'!
 withdrawSimpleQuery: aValue
 
 	lines add: 'Extraccion por ', aValue asString.! !
 
-!AccountSummaryQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:03:29'!
+!AccountSummary methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:03:29'!
 withdrawTransferQuery: aValue
 
 	lines add: 'Transferencia por -', aValue asString.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'AccountSummaryQuery class' category: #'PortfolioTreePrinter-Ejercicio'!
-AccountSummaryQuery class
+!classDefinition: 'AccountSummary class' category: #'PortfolioTreePrinter-Ejercicio'!
+AccountSummary class
 	instanceVariableNames: ''!
 
-!AccountSummaryQuery class methodsFor: 'instance creation' stamp: 'JEC 5/14/2018 18:15:22'!
+!AccountSummary class methodsFor: 'instance creation' stamp: 'JEC 5/14/2018 18:15:22'!
 of: aReceptiveAccount 
 
 	^self new initializeWith: aReceptiveAccount .! !
 
 
-!classDefinition: #InvestmentEarningsQuery category: #'PortfolioTreePrinter-Ejercicio'!
-Query subclass: #InvestmentEarningsQuery
+!classDefinition: #InvestmentEarnings category: #'PortfolioTreePrinter-Ejercicio'!
+ReceptiveAccountQuery subclass: #InvestmentEarnings
 	instanceVariableNames: 'account netValue'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!InvestmentEarningsQuery methodsFor: 'value' stamp: 'JEC 5/14/2018 22:56:42'!
+!InvestmentEarnings methodsFor: 'value' stamp: 'JEC 5/14/2018 22:56:42'!
 value
 
 	account transactionsDo: [ :aTransaction | aTransaction sendValueTo: self ].
@@ -1068,53 +1093,53 @@ value
 	^netValue.! !
 
 
-!InvestmentEarningsQuery methodsFor: 'initialization' stamp: 'JEC 5/14/2018 19:10:18'!
+!InvestmentEarnings methodsFor: 'initialization' stamp: 'JEC 5/14/2018 19:10:18'!
 initializeWith: aReceptiveAccount
 
 	account := aReceptiveAccount.
 	netValue := 0! !
 
 
-!InvestmentEarningsQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:07:29'!
+!InvestmentEarnings methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:07:29'!
 certificateOfDepositQueryWithValue: aValue numberOfDays: numberOfDays andTna: tna
 	
 	netValue  := netValue + (aValue * (tna/360) * numberOfDays).! !
 
-!InvestmentEarningsQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:06:35'!
+!InvestmentEarnings methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:06:35'!
 depositSimpleQuery: aValue
 ! !
 
-!InvestmentEarningsQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:06:49'!
+!InvestmentEarnings methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:06:49'!
 depositTransferQuery: aValue! !
 
-!InvestmentEarningsQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:06:58'!
+!InvestmentEarnings methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:06:58'!
 withdrawSimpleQuery: aValue
 ! !
 
-!InvestmentEarningsQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:07:19'!
+!InvestmentEarnings methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:07:19'!
 withdrawTransferQuery: aValue
 ! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'InvestmentEarningsQuery class' category: #'PortfolioTreePrinter-Ejercicio'!
-InvestmentEarningsQuery class
+!classDefinition: 'InvestmentEarnings class' category: #'PortfolioTreePrinter-Ejercicio'!
+InvestmentEarnings class
 	instanceVariableNames: ''!
 
-!InvestmentEarningsQuery class methodsFor: 'instance creation' stamp: 'JEC 5/14/2018 19:10:18'!
+!InvestmentEarnings class methodsFor: 'instance creation' stamp: 'JEC 5/14/2018 19:10:18'!
 of: aReceptiveAccount 
 
 	^self new initializeWith: aReceptiveAccount .! !
 
 
-!classDefinition: #InvestmentNetQuery category: #'PortfolioTreePrinter-Ejercicio'!
-Query subclass: #InvestmentNetQuery
+!classDefinition: #InvestmentNet category: #'PortfolioTreePrinter-Ejercicio'!
+ReceptiveAccountQuery subclass: #InvestmentNet
 	instanceVariableNames: 'account netValue'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!InvestmentNetQuery methodsFor: 'value' stamp: 'JEC 5/14/2018 22:56:49'!
+!InvestmentNet methodsFor: 'value' stamp: 'JEC 5/14/2018 22:56:49'!
 value
 
 	account transactionsDo: [ :aTransaction | aTransaction sendValueTo: self ].
@@ -1122,53 +1147,53 @@ value
 	^netValue.! !
 
 
-!InvestmentNetQuery methodsFor: 'initialization' stamp: 'JEC 5/14/2018 19:05:10'!
+!InvestmentNet methodsFor: 'initialization' stamp: 'JEC 5/14/2018 19:05:10'!
 initializeWith: aReceptiveAccount
 
 	account := aReceptiveAccount.
 	netValue := 0! !
 
 
-!InvestmentNetQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:26:16'!
+!InvestmentNet methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:26:16'!
 certificateOfDepositQueryWithValue: aValue numberOfDays: numberOfDays andTna: tna
 
 	netValue  := netValue + aValue.! !
 
-!InvestmentNetQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:08:37'!
+!InvestmentNet methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:08:37'!
 depositSimpleQuery: aValue
 ! !
 
-!InvestmentNetQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:08:46'!
+!InvestmentNet methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:08:46'!
 depositTransferQuery: aValue! !
 
-!InvestmentNetQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:08:55'!
+!InvestmentNet methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:08:55'!
 withdrawSimpleQuery: aValue
 ! !
 
-!InvestmentNetQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:09:04'!
+!InvestmentNet methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:09:04'!
 withdrawTransferQuery: aValue
 ! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'InvestmentNetQuery class' category: #'PortfolioTreePrinter-Ejercicio'!
-InvestmentNetQuery class
+!classDefinition: 'InvestmentNet class' category: #'PortfolioTreePrinter-Ejercicio'!
+InvestmentNet class
 	instanceVariableNames: ''!
 
-!InvestmentNetQuery class methodsFor: 'instance creation' stamp: 'JEC 5/14/2018 19:05:10'!
+!InvestmentNet class methodsFor: 'instance creation' stamp: 'JEC 5/14/2018 19:05:10'!
 of: aReceptiveAccount 
 
 	^self new initializeWith: aReceptiveAccount .! !
 
 
-!classDefinition: #TransferNetQuery category: #'PortfolioTreePrinter-Ejercicio'!
-Query subclass: #TransferNetQuery
+!classDefinition: #TransferNet category: #'PortfolioTreePrinter-Ejercicio'!
+ReceptiveAccountQuery subclass: #TransferNet
 	instanceVariableNames: 'account netValue'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'PortfolioTreePrinter-Ejercicio'!
 
-!TransferNetQuery methodsFor: 'value' stamp: 'JEC 5/14/2018 22:57:02'!
+!TransferNet methodsFor: 'value' stamp: 'JEC 5/14/2018 22:57:02'!
 value
 
 	account transactionsDo: [ :aTransaction | aTransaction sendValueTo: self ].
@@ -1176,45 +1201,80 @@ value
 	^netValue.! !
 
 
-!TransferNetQuery methodsFor: 'initialization' stamp: 'JEC 5/14/2018 18:54:34'!
+!TransferNet methodsFor: 'initialization' stamp: 'JEC 5/14/2018 18:54:34'!
 initializeWith: aReceptiveAccount
 
 	account := aReceptiveAccount.
 	netValue := 0! !
 
 
-!TransferNetQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:10:12'!
+!TransferNet methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:10:12'!
 certificateOfDepositQueryWithValue: aValue numberOfDays: numberOfDays andTna: tna
 ! !
 
-!TransferNetQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:10:21'!
+!TransferNet methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:10:21'!
 depositSimpleQuery: aValue
 ! !
 
-!TransferNetQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:10:28'!
+!TransferNet methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:10:28'!
 depositTransferQuery: aValue
 
 	netValue := netValue + aValue.! !
 
-!TransferNetQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:10:37'!
+!TransferNet methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:10:37'!
 withdrawSimpleQuery: aValue
 ! !
 
-!TransferNetQuery methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:10:45'!
+!TransferNet methodsFor: 'queries' stamp: 'JEC 5/14/2018 23:10:45'!
 withdrawTransferQuery: aValue
 
 	netValue := netValue - aValue.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'TransferNetQuery class' category: #'PortfolioTreePrinter-Ejercicio'!
-TransferNetQuery class
+!classDefinition: 'TransferNet class' category: #'PortfolioTreePrinter-Ejercicio'!
+TransferNet class
 	instanceVariableNames: ''!
 
-!TransferNetQuery class methodsFor: 'instance creation' stamp: 'JEC 5/14/2018 18:55:06'!
+!TransferNet class methodsFor: 'instance creation' stamp: 'JEC 5/14/2018 18:55:06'!
 of: aReceptiveAccount 
 
 	^self new initializeWith: aReceptiveAccount .! !
+
+
+!classDefinition: #ReversePortfolioTreePrinter category: #'PortfolioTreePrinter-Ejercicio'!
+Object subclass: #ReversePortfolioTreePrinter
+	instanceVariableNames: 'aPortfolioTreePrinter'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTreePrinter-Ejercicio'!
+
+!ReversePortfolioTreePrinter methodsFor: 'initialization' stamp: 'GAC 5/17/2018 01:51:15'!
+initializeWith: aPortfolio andNames: aDictionaryNames
+
+	aPortfolioTreePrinter  := (PortfolioTreePrinter
+		of: aPortfolio
+		with: aDictionaryNames) value.
+! !
+
+
+!ReversePortfolioTreePrinter methodsFor: 'value' stamp: 'GAC 5/17/2018 01:37:39'!
+value
+
+	^ aPortfolioTreePrinter value reversed
+	! !
+
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'ReversePortfolioTreePrinter class' category: #'PortfolioTreePrinter-Ejercicio'!
+ReversePortfolioTreePrinter class
+	instanceVariableNames: ''!
+
+!ReversePortfolioTreePrinter class methodsFor: 'instance creation' stamp: 'GAC 5/17/2018 01:30:16'!
+of: aPortfolio with: names
+
+	^self new initializeWith: aPortfolio andNames: names.! !
 
 
 !classDefinition: #SummarizingAccount category: #'PortfolioTreePrinter-Ejercicio'!
@@ -1318,20 +1378,6 @@ assertAccountIsNotManaged: anAccount
 		ifTrue: [ self error: Portfolio accountAlreadyManagedErrorMessage ].! !
 
 
-!Portfolio methodsFor: 'private' stamp: 'JEC 5/13/2018 21:14:03'!
-getDFOWithNames: accountNames withSpace: strSpaceToAppend in: names
-
-	names add: (strSpaceToAppend, (accountNames at: self)).
-	
-	accounts do: [ :account | account getDFOWithNames: accountNames withSpace: (strSpaceToAppend, ' ') in: names ]! !
-
-!Portfolio methodsFor: 'private' stamp: 'JEC 5/13/2018 21:20:01'!
-getReverseDFOWithNames: accountNames withSpace: strSpaceToAppend in: names
-
-	accounts reverseDo: [ :account | account getReverseDFOWithNames: accountNames withSpace: (strSpaceToAppend, ' ') in: names ].
-	
-	names add: (strSpaceToAppend, (accountNames at: self)).! !
-
 
 !Portfolio methodsFor: 'value' stamp: 'JEC 5/14/2018 19:58:20'!
 accountsDo: aBlock
@@ -1412,10 +1458,10 @@ initialize
 	transactions := OrderedCollection new.! !
 
 
-!ReceptiveAccount methodsFor: 'transactions' stamp: 'JEC 5/10/2018 20:58:30'!
+!ReceptiveAccount methodsFor: 'transactions' stamp: 'GAC 5/17/2018 01:48:45'!
 balance
 
-	^ transactions inject: 0 into: [ :balance :transaction | transaction modifyBalance: balance]! !
+	^ transactions inject: 0 into: [ :balance :transaction | transaction affectBalance: balance]! !
 
 !ReceptiveAccount methodsFor: 'transactions' stamp: 'HernanWilkinson 7/13/2011 18:37'!
 register: aTransaction
@@ -1428,10 +1474,10 @@ transactions
 
 	^ transactions copy! !
 
-!ReceptiveAccount methodsFor: 'transactions' stamp: 'JEC 5/14/2018 18:33:39'!
+!ReceptiveAccount methodsFor: 'transactions' stamp: 'GAC 5/17/2018 01:20:11'!
 transactionsDo: aBlock
 
-	transactions do:[:aTransaction | aBlock value: aTransaction]! !
+	transactions copy do:[:aTransaction | aBlock value: aTransaction]! !
 
 
 !ReceptiveAccount methodsFor: 'testing' stamp: 'HernanWilkinson 7/13/2011 18:37'!
@@ -1445,6 +1491,7 @@ registers: aTtransaction
 
 	^ transactions includes: aTtransaction 
 ! !
+
 
 
 !ReceptiveAccount methodsFor: 'value' stamp: 'JEC 5/14/2018 23:09:58'!
