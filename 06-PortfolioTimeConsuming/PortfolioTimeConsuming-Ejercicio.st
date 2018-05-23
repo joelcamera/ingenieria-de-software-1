@@ -584,37 +584,24 @@ Object subclass: #AccountSummaryWithAllInvestmentInformation
 	poolDictionaries: ''
 	category: 'PortfolioTimeConsuming-Ejercicio'!
 
-!AccountSummaryWithAllInvestmentInformation methodsFor: 'as yet unclassified' stamp: 'JEC 5/21/2018 20:54:26'!
-getLinesRunning: aBlockClosure atSameTimeOf: aBlockClosure2 
-
-	 | lines lineToAppend semaphore |
-		
-	semaphore := Semaphore new.
-	
-	[
-		lines := aBlockClosure value.
-		semaphore signal.
-	] fork.
-
-	lineToAppend := aBlockClosure2 value.
-
-	semaphore wait.
-
-	^ lines add: lineToAppend; yourself.! !
-
-!AccountSummaryWithAllInvestmentInformation methodsFor: 'as yet unclassified' stamp: 'HernanWilkinson 7/17/2011 23:56'!
+!AccountSummaryWithAllInvestmentInformation methodsFor: 'initialization' stamp: 'HernanWilkinson 7/17/2011 23:56'!
 initializeFor: aReceptiveAccount 
 	
 	account := aReceptiveAccount ! !
 
-!AccountSummaryWithAllInvestmentInformation methodsFor: 'as yet unclassified' stamp: 'JEC 5/21/2018 20:58:17'!
+
+!AccountSummaryWithAllInvestmentInformation methodsFor: 'accessing' stamp: 'JEC 5/23/2018 19:46:56'!
 lines 
 
-	| investmentEarnings |
+	| investmentEarnings aPromiseLines aLineToAppend |
 	
 	investmentEarnings := InvestmentNetVisitor for: account.
 	
-	^ self getLinesRunning: [ (AccountSummaryWithInvestmentEarnings for: account) lines.] atSameTimeOf: [ 'Inversiones por ', investmentEarnings value printString.]! !
+	aPromiseLines := Future with: [ (AccountSummaryWithInvestmentEarnings for: account) lines.].
+	
+	aLineToAppend := 'Inversiones por ', investmentEarnings value printString.
+	
+	^ (aPromiseLines value) add: aLineToAppend; yourself.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -635,37 +622,24 @@ Object subclass: #AccountSummaryWithInvestmentEarnings
 	poolDictionaries: ''
 	category: 'PortfolioTimeConsuming-Ejercicio'!
 
-!AccountSummaryWithInvestmentEarnings methodsFor: 'as yet unclassified' stamp: 'JEC 5/21/2018 20:54:54'!
-getLinesRunning: aBlockClosure atSameTimeOf: aBlockClosure2 
-
-	 | lines lineToAppend semaphore |
-		
-	semaphore := Semaphore new.
-	
-	[
-		lines := aBlockClosure value.
-		semaphore signal.
-	] fork.
-
-	lineToAppend := aBlockClosure2 value.
-
-	semaphore wait.
-
-	^ lines add: lineToAppend; yourself.! !
-
-!AccountSummaryWithInvestmentEarnings methodsFor: 'as yet unclassified' stamp: 'HernanWilkinson 7/17/2011 23:52'!
+!AccountSummaryWithInvestmentEarnings methodsFor: 'initialization' stamp: 'HernanWilkinson 7/17/2011 23:52'!
 initializeFor: aReceptiveAccount 
 	
 	account := aReceptiveAccount ! !
 
-!AccountSummaryWithInvestmentEarnings methodsFor: 'as yet unclassified' stamp: 'JEC 5/21/2018 20:58:33'!
+
+!AccountSummaryWithInvestmentEarnings methodsFor: 'accessing' stamp: 'JEC 5/23/2018 19:48:12'!
 lines 
 
-	| investmentEarnings |
+	| investmentEarnings aPromiseLines aLineToAppend  |
 	
 	investmentEarnings := InvestmentEarningVisitor for: account.
 	
-	^ self getLinesRunning: [ (AccountSummary for: account) lines. ] atSameTimeOf: [ 'Ganancias por ', investmentEarnings value printString. ].! !
+	aPromiseLines := Future with: [ (AccountSummary for: account) lines. ].
+	
+	aLineToAppend := 'Ganancias por ', investmentEarnings value printString.
+	
+	^ (aPromiseLines value) add: aLineToAppend; yourself.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -1302,6 +1276,39 @@ InvestmentNetVisitor class
 for: aReceptiveAccount 
 	
 	^ self new initializeFor: aReceptiveAccount ! !
+
+
+!classDefinition: #Future category: #'PortfolioTimeConsuming-Ejercicio'!
+Object subclass: #Future
+	instanceVariableNames: 'block semaphore lock futureValue error'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'PortfolioTimeConsuming-Ejercicio'!
+
+!Future methodsFor: 'value' stamp: 'JEC 5/23/2018 19:37:45'!
+value
+
+	lock isSignaled ifFalse: [ lock wait ].
+	
+	^futureValue! !
+
+!Future methodsFor: 'value' stamp: 'JEC 5/23/2018 19:38:49'!
+value: aBlock
+	lock := Semaphore new.
+	
+	[ [ futureValue := aBlock value]
+		ensure: [ lock signal ] ] fork.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Future class' category: #'PortfolioTimeConsuming-Ejercicio'!
+Future class
+	instanceVariableNames: ''!
+
+!Future class methodsFor: 'instance creation' stamp: 'JEC 5/23/2018 19:30:45'!
+with: aBlock
+
+	^self new value: aBlock! !
 
 
 !classDefinition: #SummarizingAccount category: #'PortfolioTimeConsuming-Ejercicio'!
