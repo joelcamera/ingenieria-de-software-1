@@ -354,7 +354,7 @@ test20
 	self deny: aGame OHasWon .
 	self assert: aGame isGameOver .! !
 
-!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'JEC 5/24/2018 21:48:14'!
+!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 18:42:23'!
 test21
 
 	| aGame |
@@ -368,13 +368,98 @@ test21
 	aGame putXAt: 2@1.
 	aGame putOAt: 2@3.
 	aGame putXAt: 3@2.
-	aGame putOAt: 3@1.
-	aGame putXAt: 3@3.
+	aGame putOAt: 3@3.
+	aGame putXAt: 3@1.
 
-	self assert: aGame isTied.
-	self deny: aGame XHasWon .
-	self deny: aGame OHasWon .
-	self assert: aGame isGameOver .! !
+	self deny: aGame isTied.
+	self assert: aGame XHasWon .
+! !
+
+!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 18:46:54'!
+test22
+
+	| aGame |
+	
+	aGame := TicTacToe new.
+	
+	self should: [ aGame putXAt: 4@2 ]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [ :anError | 
+			self assert: TicTacToe outOfGridErrorMessage equals: anError messageText.
+			self assert: aGame Xs isEmpty.
+			self assert: aGame Os isEmpty.] .
+	
+	
+	! !
+
+!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 18:52:00'!
+test23
+
+	| aGame |
+	
+	aGame := TicTacToe new.
+	
+	self should: [ aGame putXAt: 2@4 ]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [ :anError | 
+			self assert: TicTacToe outOfGridErrorMessage equals: anError messageText.
+			self assert: aGame Xs isEmpty.
+			self assert: aGame Os isEmpty.] .
+	
+	
+	! !
+
+!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 18:54:43'!
+test24
+
+	| aGame |
+	
+	aGame := TicTacToe new.
+	
+	self should: [ aGame putXAt: 0@3 ]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [ :anError | 
+			self assert: TicTacToe outOfGridErrorMessage equals: anError messageText.
+			self assert: aGame Xs isEmpty.
+			self assert: aGame Os isEmpty.] .
+	
+	
+	! !
+
+!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 18:56:15'!
+test25
+
+	| aGame |
+	
+	aGame := TicTacToe new.
+	
+	self should: [ aGame putXAt: 1@0 ]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [ :anError | 
+			self assert: TicTacToe outOfGridErrorMessage equals: anError messageText.
+			self assert: aGame Xs isEmpty.
+			self assert: aGame Os isEmpty.] .
+	
+	
+	! !
+
+!TicTacToeTest methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 19:21:27'!
+test26WhenOPlaysAssertIfThePositionIsInRange
+	| aGame |
+	aGame _ TicTacToe new.
+	aGame putXAt: 1 @ 1.
+	self
+		should: [ aGame putOAt: 1 @ 0 ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self
+				assert: TicTacToe outOfGridErrorMessage
+				equals: anError messageText.
+			self
+				assert: 1
+				equals: aGame Xs size.
+			self assert: (aGame Xs includes: 1 @ 1).
+			self assert: aGame Os isEmpty ].! !
 
 
 !classDefinition: #TicTacToe category: #TicTacToe!
@@ -403,6 +488,25 @@ XHasWon
 Xs
 	
 	^ xs copy.! !
+
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 19:38:19'!
+assertGameIsNotOver
+	self isGameOver 
+		ifTrue: [ self error: self class cannotPlayWhenGameIsOverErrorMessage ].
+! !
+
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 19:54:11'!
+assertPositionInRange: aPosition
+
+	((aPosition x between: 1 and: 3) not or: [(aPosition y between: 1 and: 3) not])
+		ifTrue: [ self error: self class outOfGridErrorMessage ].! !
+
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 19:36:47'!
+assertPositionNotTaken: aPosition
+
+	((xs includes: aPosition) or: [ os includes: aPosition ])
+		ifTrue: [ self error: self class positionTakenErrorMessage ].
+! !
 
 !TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/24/2018 21:04:20'!
 hasCompletedColumnPositions: positions
@@ -446,35 +550,33 @@ isTied
 	
 	^((xs size = 5) and: [self XHasWon not]) and: [ self OHasWon not]! !
 
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/24/2018 21:31:08'!
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 19:39:22'!
 putOAt: aPosition
+
+	self assertPositionInRange: aPosition.
 
 	turn = #o
 		ifFalse: [ self error: self class notOTurnErrorMessage ].
 		
-	((xs includes: aPosition) or: [ os includes: aPosition ])
-		ifTrue: [ self error: self class positionTakenErrorMessage ].
-	
-	self isGameOver
-		ifTrue: [ self error: self class cannotPlayWhenGameIsOverErrorMessage ].
-
+	self assertPositionNotTaken: aPosition.
+	self assertGameIsNotOver.
+		
 	os add: aPosition.
 	turn := #x.
 	
 	(self hasWon: os)
 		ifTrue: [winner := #o].! !
 
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/24/2018 21:38:51'!
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 19:39:09'!
 putXAt: aPosition
 
+	self assertPositionInRange: aPosition.
+		
 	turn = #x
 		ifFalse: [ self error: self class notXTurnErrorMessage ].
 		
-	((xs includes: aPosition) or: [ os includes: aPosition ])
-		ifTrue: [ self error: self class positionTakenErrorMessage ].
-		
-	self isGameOver 
-		ifTrue: [ self error: self class cannotPlayWhenGameIsOverErrorMessage ].
+	self assertPositionNotTaken: aPosition.
+	self assertGameIsNotOver.
 		
 	xs add: aPosition.
 	turn := #o.
@@ -512,6 +614,10 @@ notOTurnErrorMessage
 notXTurnErrorMessage
 	
 	^'Is not the X turn'.! !
+
+!TicTacToe class methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 18:51:06'!
+outOfGridErrorMessage
+	^'Posicion fuera de grilla'.! !
 
 !TicTacToe class methodsFor: 'as yet unclassified' stamp: 'JEC 5/24/2018 19:54:34'!
 positionTakenErrorMessage
