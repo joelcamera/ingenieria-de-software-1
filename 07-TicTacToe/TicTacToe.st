@@ -550,39 +550,72 @@ isTied
 	
 	^((xs size = 5) and: [self XHasWon not]) and: [ self OHasWon not]! !
 
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 19:39:22'!
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:23:50'!
+playerOPlays
+
+	^turn = #o! !
+
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:23:57'!
+playerXPlays
+
+	^turn = #x! !
+
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:38:16'!
 putOAt: aPosition
 
-	self assertPositionInRange: aPosition.
+	| ticTacToeState |
+	
+	ticTacToeState := TicTacToeState stateFor: self.
+	
+	ticTacToeState putOAt: aPosition for: self! !
 
-	turn = #o
-		ifFalse: [ self error: self class notOTurnErrorMessage ].
-		
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:32:10'!
+putOWhenPlayerOPlaysAt: aPosition
+
+	self assertPositionInRange: aPosition.
 	self assertPositionNotTaken: aPosition.
-	self assertGameIsNotOver.
-		
+	
 	os add: aPosition.
 	turn := #x.
 	
 	(self hasWon: os)
 		ifTrue: [winner := #o].! !
 
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 19:39:09'!
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:34:31'!
+putOWhenPlayerXPlaysAt: aPosition
+
+	self error: self class notOTurnErrorMessage! !
+
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:44:06'!
+putWhenGameIsFinished
+	
+	self error: self class cannotPlayWhenGameIsOverErrorMessage! !
+
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:45:07'!
 putXAt: aPosition
 
+	| ticTacToeState |
+	
+	ticTacToeState := TicTacToeState stateFor: self.
+	
+	ticTacToeState putXAt: aPosition for: self! !
+
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:34:49'!
+putXWhenPlayerOPlaysAt: aPosition
+
+	self error: self class notXTurnErrorMessage! !
+
+!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:32:37'!
+putXWhenPlayerXPlaysAt: aPosition
+
 	self assertPositionInRange: aPosition.
-		
-	turn = #x
-		ifFalse: [ self error: self class notXTurnErrorMessage ].
-		
 	self assertPositionNotTaken: aPosition.
-	self assertGameIsNotOver.
-		
+	
 	xs add: aPosition.
 	turn := #o.
 	
 	(self hasWon: xs)
-		ifTrue: [ winner := #x ].! !
+		ifTrue: [winner := #x].! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -623,3 +656,109 @@ outOfGridErrorMessage
 positionTakenErrorMessage
 	
 	^'The position is taken'.! !
+
+
+!classDefinition: #TicTacToeState category: #TicTacToe!
+Object subclass: #TicTacToeState
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TicTacToe'!
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TicTacToeState class' category: #TicTacToe!
+TicTacToeState class
+	instanceVariableNames: ''!
+
+!TicTacToeState class methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:18:57'!
+stateFor: aTicTacToe
+
+	^ (self subclasses detect: [:state | state canHandleTicTacToe: aTicTacToe]) new.! !
+
+
+!classDefinition: #TicTacToeStatePlayerGameOver category: #TicTacToe!
+TicTacToeState subclass: #TicTacToeStatePlayerGameOver
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TicTacToe'!
+
+!TicTacToeStatePlayerGameOver methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:43:33'!
+putOAt: aPosition for: aTicTacToe 
+
+	aTicTacToe putWhenGameIsFinished! !
+
+!TicTacToeStatePlayerGameOver methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:44:27'!
+putXAt: aPosition for: aTicTacToe 
+
+	aTicTacToe putWhenGameIsFinished! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TicTacToeStatePlayerGameOver class' category: #TicTacToe!
+TicTacToeStatePlayerGameOver class
+	instanceVariableNames: ''!
+
+!TicTacToeStatePlayerGameOver class methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:22:06'!
+canHandleTicTacToe: aTicTacToe
+
+	^aTicTacToe isGameOver! !
+
+
+!classDefinition: #TicTacToeStatePlayerOPlays category: #TicTacToe!
+TicTacToeState subclass: #TicTacToeStatePlayerOPlays
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TicTacToe'!
+
+!TicTacToeStatePlayerOPlays methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:30:42'!
+putOAt: aPosition for: aTicTacToe
+
+	aTicTacToe putOWhenPlayerOPlaysAt: aPosition! !
+
+!TicTacToeStatePlayerOPlays methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:35:15'!
+putXAt: aPosition for: aTicTacToe
+
+	aTicTacToe putXWhenPlayerOPlaysAt: aPosition! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TicTacToeStatePlayerOPlays class' category: #TicTacToe!
+TicTacToeStatePlayerOPlays class
+	instanceVariableNames: ''!
+
+!TicTacToeStatePlayerOPlays class methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:41:07'!
+canHandleTicTacToe: aTicTacToe
+
+	^ aTicTacToe playerOPlays and: [ aTicTacToe isGameOver not]! !
+
+
+!classDefinition: #TicTacToeStatePlayerXPlays category: #TicTacToe!
+TicTacToeState subclass: #TicTacToeStatePlayerXPlays
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TicTacToe'!
+
+!TicTacToeStatePlayerXPlays methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:35:27'!
+putOAt: aPosition for: aTicTacToe
+
+	aTicTacToe putOWhenPlayerXPlaysAt: aPosition! !
+
+!TicTacToeStatePlayerXPlays methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:33:24'!
+putXAt: aPosition for: aTicTacToe
+
+	aTicTacToe putXWhenPlayerXPlaysAt: aPosition! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TicTacToeStatePlayerXPlays class' category: #TicTacToe!
+TicTacToeStatePlayerXPlays class
+	instanceVariableNames: ''!
+
+!TicTacToeStatePlayerXPlays class methodsFor: 'as yet unclassified' stamp: 'JEC 5/28/2018 23:41:17'!
+canHandleTicTacToe: aTicTacToe
+
+	^ aTicTacToe playerXPlays and: [ aTicTacToe isGameOver not]! !
