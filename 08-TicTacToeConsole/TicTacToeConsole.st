@@ -238,6 +238,33 @@ Game Tied'.
 
 	self assert: aView print = expectedView.! !
 
+!TicTacToeObserverTest methodsFor: 'testing' stamp: 'JEC 6/4/2018 01:44:31'!
+test13CanHaveConsolesAndViewsObservingTheGame
+
+	| firstView secondView firstConsole secondConsole expectedView expectedLog |
+
+	game _ TicTacToe new.
+	firstConsole _ TicTacToeConsole for: game.
+	secondConsole _ TicTacToeConsole for: game.
+	firstView := TicTacToeView for: game.
+	secondView := TicTacToeView for: game.
+	
+	game markAll: {1 @ 1. 2 @ 3}.
+
+	expectedLog _ OrderedCollection new.
+	expectedLog add: 'X marcó en 1@1'; add: 'Estado: Jugando O'; add: 'O marcó en 2@3'; add: 'Estado: Jugando X'.
+	expectedView := 'X| | 
+-----
+ | |O
+-----
+ | | 
+Playing X'.
+
+	self assert: firstConsole print = expectedLog.
+	self assert: secondConsole print = expectedLog.
+	self assert: firstView print = expectedView.
+	self assert: secondView print = expectedView.	! !
+
 
 !classDefinition: #TicTacToeTest category: #TicTacToe!
 TestCase subclass: #TicTacToeTest
