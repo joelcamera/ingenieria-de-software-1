@@ -5,11 +5,6 @@ TestCase subclass: #TicTacToeObserverTest
 	poolDictionaries: ''
 	category: 'TicTacToe'!
 
-!TicTacToeObserverTest methodsFor: 'testing' stamp: 'JEC 6/2/2018 11:57:19'!
-functionalException
-
-	^Error - MessageNotUnderstood! !
-
 !TicTacToeObserverTest methodsFor: 'testing' stamp: 'JEC 6/3/2018 22:27:41'!
 test01WhenHavingANewTicTacToeGameAndCreatingATicTacToeConsoleAttachedToItTheLogMustBeEmpty
 
@@ -269,109 +264,6 @@ Playing X'.
 	self assert: secondConsole print = expectedLog.
 	self assert: firstView print = expectedView.
 	self assert: secondView print = expectedView.	! !
-
-
-!TicTacToeObserverTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertCanNotMarkAt: aPosition
-
-	self assertCanNotMarkUsing: [ game markWithXAt: aPosition ].
-	self assertCanNotMarkUsing: [ game markWithOAt: aPosition ].
-	
-	! !
-
-!TicTacToeObserverTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertCanNotMarkUsing: aMarkingClosure
-
-	self
-		should: aMarkingClosure 
-		raise: Error - MessageNotUnderstood
-		withExceptionDo: [ :anError |
-			self assert: TicTacToe positionOutsideBoardErrorMessage equals: anError messageText.
-			self assertXIsMarkedOn: {} andOOn: {} ].! !
-
-!TicTacToeObserverTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertGameIsNotOver
-
-	self deny: game isOver.
-	self deny: game hasPlayerXWon.
-	self deny: game hasPlayerOWon.
-	self deny: game isTied.	! !
-
-!TicTacToeObserverTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertGameIsOver
-	
-	self assert: game isOver.
-
-	self deny: game isPlayingX.
-	self deny: game isPlayingO.
-		
-! !
-
-!TicTacToeObserverTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertGameIsTied
-
-	self assertGameIsOver.
-	
-	self deny: game hasPlayerXWon.
-	self deny: game hasPlayerOWon.
-	self assert: game isTied.
-! !
-
-!TicTacToeObserverTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertIsPlayingO
-	
-	self deny: game isPlayingX.
-	self assert: game isPlayingO.
-	self assertGameIsNotOver ! !
-
-!TicTacToeObserverTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertIsPlayingX
-		
-	self assert: game isPlayingX.
-	self deny: game isPlayingO.
-	self assertGameIsNotOver.
-	! !
-
-!TicTacToeObserverTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertOIsMarkedOn: oPositions
-		
-	self assert: oPositions size equals: game playerOPositions size.
-	self assert: (game playerOPositions difference: oPositions) isEmpty.
-! !
-
-!TicTacToeObserverTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertOWon
-
-	self assertGameIsOver.
-	
-	self deny: game hasPlayerXWon.
-	self assert: game hasPlayerOWon.
-	self deny: game isTied.
-! !
-
-!TicTacToeObserverTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertXIsMarkedOn: xPositions
-
-	self assert: xPositions size equals: game playerXPositions size.
-	self assert: (game playerXPositions difference: xPositions) isEmpty.
-	! !
-
-!TicTacToeObserverTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertXIsMarkedOn: xPositions andOOn: oPositions
- 
-	self assertXIsMarkedOn: xPositions.
-	self assertOIsMarkedOn: oPositions.
-	! !
-
-!TicTacToeObserverTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertXWon
-	
-	self assertGameIsOver.
-	
-	self assert: game hasPlayerXWon.
-	self deny: game hasPlayerOWon.
-	self deny: game isTied.
-! !
 
 
 !classDefinition: #TicTacToeTest category: #TicTacToe!
@@ -1074,49 +966,6 @@ positionTakenErrorMessage
 	^'Position taken'! !
 
 
-!classDefinition: #TicTacToeConsole category: #TicTacToe!
-Object subclass: #TicTacToeConsole
-	instanceVariableNames: 'game log'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'TicTacToe'!
-
-!TicTacToeConsole methodsFor: 'print' stamp: 'JEC 6/3/2018 22:27:25'!
-print
-
-	^log! !
-
-
-!TicTacToeConsole methodsFor: 'initialization' stamp: 'JEC 6/2/2018 23:35:55'!
-intializeFor: aTicTacToe
-
-	game := aTicTacToe.
-	log := OrderedCollection new.! !
-
-
-!TicTacToeConsole methodsFor: 'private' stamp: 'JEC 6/3/2018 21:54:54'!
-notify: aLastPlayInfo
-
-	log add: aLastPlayInfo lastPlayer, ' marcó en ', aLastPlayInfo lastPositionPlayed asString;
-		add: aLastPlayInfo actualState.! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'TicTacToeConsole class' category: #TicTacToe!
-TicTacToeConsole class
-	instanceVariableNames: ''!
-
-!TicTacToeConsole class methodsFor: 'instance creation' stamp: 'JEC 6/2/2018 23:29:08'!
-for: aTicTacToe
-
-	| aNewTicTacToeConsole |
-	
-	aNewTicTacToeConsole := self new intializeFor: aTicTacToe.
-	aTicTacToe attach: aNewTicTacToeConsole.
-
-	^ aNewTicTacToeConsole! !
-
-
 !classDefinition: #TicTacToeLastPlayInfo category: #TicTacToe!
 Object subclass: #TicTacToeLastPlayInfo
 	instanceVariableNames: 'lastPositionPlayed actualState lastState'
@@ -1172,33 +1021,138 @@ Object subclass: #TicTacToeObserver
 	poolDictionaries: ''
 	category: 'TicTacToe'!
 
-!TicTacToeObserver methodsFor: 'initialization' stamp: 'JEC 6/4/2018 00:48:28'!
-intializeFor: aTicTacToe
-
-	self subclassResponsibility ! !
-
-
-!TicTacToeObserver methodsFor: 'print' stamp: 'JEC 6/4/2018 00:48:35'!
+!TicTacToeObserver methodsFor: 'print' stamp: 'JEC 6/4/2018 02:23:10'!
 print
 
 	self subclassResponsibility ! !
 
 
-!TicTacToeObserver methodsFor: 'private' stamp: 'JEC 6/4/2018 00:48:42'!
+!TicTacToeObserver methodsFor: 'private' stamp: 'JEC 6/4/2018 02:23:49'!
 notify: aLastPlayInfo
 
 	self subclassResponsibility ! !
 
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'TicTacToeObserver class' category: #TicTacToe!
-TicTacToeObserver class
-	instanceVariableNames: 'grid'!
-
-!TicTacToeObserver class methodsFor: 'instance creation' stamp: 'JEC 6/4/2018 00:50:22'!
-for: aTicTacToe
+!TicTacToeObserver methodsFor: 'initialization' stamp: 'JEC 6/4/2018 02:24:15'!
+intializeFor: aTicTacToe
 
 	self subclassResponsibility ! !
+
+
+!classDefinition: #TicTacToeConsole category: #TicTacToe!
+TicTacToeObserver subclass: #TicTacToeConsole
+	instanceVariableNames: 'game log'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TicTacToe'!
+
+!TicTacToeConsole methodsFor: 'print' stamp: 'JEC 6/3/2018 22:27:25'!
+print
+
+	^log! !
+
+
+!TicTacToeConsole methodsFor: 'initialization' stamp: 'JEC 6/2/2018 23:35:55'!
+intializeFor: aTicTacToe
+
+	game := aTicTacToe.
+	log := OrderedCollection new.! !
+
+
+!TicTacToeConsole methodsFor: 'private' stamp: 'JEC 6/3/2018 21:54:54'!
+notify: aLastPlayInfo
+
+	log add: aLastPlayInfo lastPlayer, ' marcó en ', aLastPlayInfo lastPositionPlayed asString;
+		add: aLastPlayInfo actualState.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TicTacToeConsole class' category: #TicTacToe!
+TicTacToeConsole class
+	instanceVariableNames: ''!
+
+!TicTacToeConsole class methodsFor: 'instance creation' stamp: 'JEC 6/2/2018 23:29:08'!
+for: aTicTacToe
+
+	| aNewTicTacToeConsole |
+	
+	aNewTicTacToeConsole := self new intializeFor: aTicTacToe.
+	aTicTacToe attach: aNewTicTacToeConsole.
+
+	^ aNewTicTacToeConsole! !
+
+
+!classDefinition: #TicTacToeView category: #TicTacToe!
+TicTacToeObserver subclass: #TicTacToeView
+	instanceVariableNames: 'game lastPlayInfoCollection grid positionsDictionary nextState'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TicTacToe'!
+
+!TicTacToeView methodsFor: 'initialization' stamp: 'JEC 6/4/2018 02:05:16'!
+intializeFor: aTicTacToe
+
+	game := aTicTacToe.
+	lastPlayInfoCollection := OrderedCollection new.
+	
+	grid := ' | | 
+-----
+ | | 
+-----
+ | | ' asOrderedCollection.
+
+	positionsDictionary := Dictionary new.
+	positionsDictionary 
+				add: 1@1 -> 1; 
+				add: 1@2 -> 3; 
+				add: 1@3 -> 5;
+				add: 2@1 -> 13; 
+				add: 2@2 -> 15; 
+				add: 2@3 -> 17;
+				add: 3@1 -> 25; 
+				add: 3@2 -> 27; 
+				add: 3@3 -> 29.
+	
+	nextState := ''.! !
+
+
+!TicTacToeView methodsFor: 'print' stamp: 'JEC 6/4/2018 02:13:39'!
+print
+
+	| aStrGrid |
+	
+	aStrGrid := String new: 29.
+	
+	(1 to: 29) do: [ :index | aStrGrid at: index put: (grid at: index) ].
+
+	^aStrGrid append: nextState.! !
+
+
+!TicTacToeView methodsFor: 'private' stamp: 'JEC 6/4/2018 02:05:01'!
+notify: aLastPlayInfo
+
+	lastPlayInfoCollection add: aLastPlayInfo.
+	
+	grid at: (positionsDictionary at: aLastPlayInfo lastPositionPlayed) put: aLastPlayInfo lastPlayer asCharacter.
+	
+	nextState := '
+' append: aLastPlayInfo shortState.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TicTacToeView class' category: #TicTacToe!
+TicTacToeView class
+	instanceVariableNames: 'grid'!
+
+!TicTacToeView class methodsFor: 'instance creation' stamp: 'JEC 6/3/2018 23:24:53'!
+for: aTicTacToe
+
+	| aNewTicTacToeView |
+	
+	aNewTicTacToeView := self new intializeFor: aTicTacToe.
+	aTicTacToe attach: aNewTicTacToeView.
+
+	^ aNewTicTacToeView! !
 
 
 !classDefinition: #TicTacToeState category: #TicTacToe!
@@ -1525,76 +1479,3 @@ printShortState
 printState
 
 	^'Jugando X'! !
-
-
-!classDefinition: #TicTacToeView category: #TicTacToe!
-Object subclass: #TicTacToeView
-	instanceVariableNames: 'game lastPlayInfoCollection grid positionsDictionary nextState'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'TicTacToe'!
-
-!TicTacToeView methodsFor: 'initialization' stamp: 'JEC 6/4/2018 02:05:16'!
-intializeFor: aTicTacToe
-
-	game := aTicTacToe.
-	lastPlayInfoCollection := OrderedCollection new.
-	
-	grid := ' | | 
------
- | | 
------
- | | ' asOrderedCollection.
-
-	positionsDictionary := Dictionary new.
-	positionsDictionary 
-				add: 1@1 -> 1; 
-				add: 1@2 -> 3; 
-				add: 1@3 -> 5;
-				add: 2@1 -> 13; 
-				add: 2@2 -> 15; 
-				add: 2@3 -> 17;
-				add: 3@1 -> 25; 
-				add: 3@2 -> 27; 
-				add: 3@3 -> 29.
-	
-	nextState := ''.! !
-
-
-!TicTacToeView methodsFor: 'print' stamp: 'JEC 6/4/2018 02:13:39'!
-print
-
-	| aStrGrid |
-	
-	aStrGrid := String new: 29.
-	
-	(1 to: 29) do: [ :index | aStrGrid at: index put: (grid at: index) ].
-
-	^aStrGrid append: nextState.! !
-
-
-!TicTacToeView methodsFor: 'private' stamp: 'JEC 6/4/2018 02:05:01'!
-notify: aLastPlayInfo
-
-	lastPlayInfoCollection add: aLastPlayInfo.
-	
-	grid at: (positionsDictionary at: aLastPlayInfo lastPositionPlayed) put: aLastPlayInfo lastPlayer asCharacter.
-	
-	nextState := '
-' append: aLastPlayInfo shortState.! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'TicTacToeView class' category: #TicTacToe!
-TicTacToeView class
-	instanceVariableNames: 'grid'!
-
-!TicTacToeView class methodsFor: 'instance creation' stamp: 'JEC 6/3/2018 23:24:53'!
-for: aTicTacToe
-
-	| aNewTicTacToeView |
-	
-	aNewTicTacToeView := self new intializeFor: aTicTacToe.
-	aTicTacToe attach: aNewTicTacToeView.
-
-	^ aNewTicTacToeView! !
