@@ -1,16 +1,11 @@
-!classDefinition: #TicTacToeConsoleTest category: #TicTacToe!
-TestCase subclass: #TicTacToeConsoleTest
+!classDefinition: #TicTacToeObserverTest category: #TicTacToe!
+TestCase subclass: #TicTacToeObserverTest
 	instanceVariableNames: 'game'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TicTacToe'!
 
-!TicTacToeConsoleTest methodsFor: 'testing' stamp: 'JEC 6/2/2018 11:57:19'!
-functionalException
-
-	^Error - MessageNotUnderstood! !
-
-!TicTacToeConsoleTest methodsFor: 'testing' stamp: 'JEC 6/2/2018 23:26:10'!
+!TicTacToeObserverTest methodsFor: 'testing' stamp: 'JEC 6/3/2018 22:27:41'!
 test01WhenHavingANewTicTacToeGameAndCreatingATicTacToeConsoleAttachedToItTheLogMustBeEmpty
 
 	| aConsole expectedLog |
@@ -20,9 +15,9 @@ test01WhenHavingANewTicTacToeGameAndCreatingATicTacToeConsoleAttachedToItTheLogM
 
 	expectedLog _ OrderedCollection new.
 	
-	self assert: aConsole log = expectedLog.! !
+	self assert: aConsole print = expectedLog.! !
 
-!TicTacToeConsoleTest methodsFor: 'testing' stamp: 'JEC 6/2/2018 23:26:24'!
+!TicTacToeObserverTest methodsFor: 'testing' stamp: 'JEC 6/3/2018 22:27:45'!
 test02WhenPlayerXMarksAPositionTheConsoleLogsThatThatPlayerMarkedThatPositionAndIsTheTurnOfPlayerO
 
 	| aConsole expectedLog |
@@ -33,9 +28,9 @@ test02WhenPlayerXMarksAPositionTheConsoleLogsThatThatPlayerMarkedThatPositionAnd
 
 	expectedLog _ OrderedCollection with: 'X marcó en 1@1' with: 'Estado: Jugando O'.
 	
-	self assert: aConsole log = expectedLog.! !
+	self assert: aConsole print = expectedLog.! !
 
-!TicTacToeConsoleTest methodsFor: 'testing' stamp: 'JEC 6/2/2018 23:26:32'!
+!TicTacToeObserverTest methodsFor: 'testing' stamp: 'JEC 6/3/2018 22:27:49'!
 test03WhenPlayerOMarksAPositionTheConsoleLogsThatThatPlayerMarkedThatPositionAndIsTheTurnOfPlayerX
 
 	| aConsole expectedLog |
@@ -47,9 +42,9 @@ test03WhenPlayerOMarksAPositionTheConsoleLogsThatThatPlayerMarkedThatPositionAnd
 	expectedLog _ OrderedCollection new.
 	expectedLog add: 'X marcó en 1@1'; add: 'Estado: Jugando O'; add: 'O marcó en 2@3'; add: 'Estado: Jugando X'.
 
-	self assert: aConsole log = expectedLog.! !
+	self assert: aConsole print = expectedLog.! !
 
-!TicTacToeConsoleTest methodsFor: 'testing' stamp: 'JEC 6/2/2018 23:26:40'!
+!TicTacToeObserverTest methodsFor: 'testing' stamp: 'JEC 6/3/2018 22:27:55'!
 test04WhenPlayerXWinsTheGameTheConsoleLogsAllGameAndAtTheEndShowsThatTheGameIsFinishedAndTheWinner
 
 	| aConsole expectedLog |
@@ -72,9 +67,9 @@ test04WhenPlayerXWinsTheGameTheConsoleLogsAllGameAndAtTheEndShowsThatTheGameIsFi
 		add: 'X marcó en 1@3';
 		add: 'Estado: Juego terminado - Ganó X!!'.
 
-	self assert: aConsole log = expectedLog.! !
+	self assert: aConsole print = expectedLog.! !
 
-!TicTacToeConsoleTest methodsFor: 'testing' stamp: 'JEC 6/2/2018 23:26:54'!
+!TicTacToeObserverTest methodsFor: 'testing' stamp: 'JEC 6/3/2018 22:28:02'!
 test05WhenPlayerOWinsTheGameTheConsoleLogsAllGameAndAtTheEndShowsThatTheGameIsFinishedAndTheWinner
 
 	| aConsole expectedLog |
@@ -98,9 +93,9 @@ test05WhenPlayerOWinsTheGameTheConsoleLogsAllGameAndAtTheEndShowsThatTheGameIsFi
 		add: 'O marcó en 1@3';
 		add: 'Estado: Juego terminado - Ganó O!!'.
 
-	self assert: aConsole log = expectedLog.! !
+	self assert: aConsole print = expectedLog.! !
 
-!TicTacToeConsoleTest methodsFor: 'testing' stamp: 'JEC 6/2/2018 23:27:03'!
+!TicTacToeObserverTest methodsFor: 'testing' stamp: 'JEC 6/3/2018 22:28:07'!
 test06WhenTheGameIsTiedTheConsoleLogsAllGameAndAtTheEndShowsThatTheGameIsFinishedAndTied
 
 	| aConsole expectedLog |
@@ -130,110 +125,118 @@ test06WhenTheGameIsTiedTheConsoleLogsAllGameAndAtTheEndShowsThatTheGameIsFinishe
 		add: 'X marcó en 3@3';
 		add: 'Estado: Juego terminado - Empate'.
 
-	self assert: aConsole log = expectedLog.! !
+	self assert: aConsole print = expectedLog.! !
 
+!TicTacToeObserverTest methodsFor: 'testing' stamp: 'JEC 6/4/2018 00:53:01'!
+test07WhenHavingANewTicTacToeGameTheConsoleViewMustBeAnEmptyGrid
 
-!TicTacToeConsoleTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertCanNotMarkAt: aPosition
+	| aView expectedView |
 
-	self assertCanNotMarkUsing: [ game markWithXAt: aPosition ].
-	self assertCanNotMarkUsing: [ game markWithOAt: aPosition ].
+	game _ TicTacToe new.
+	aView := TicTacToeView for: game.
+
+	expectedView := ' | | 
+-----
+ | | 
+-----
+ | | '.
+
+	self assert: aView print = expectedView.! !
+
+!TicTacToeObserverTest methodsFor: 'testing' stamp: 'JEC 6/4/2018 00:53:47'!
+test08WhenPlayerXPlaysTheGridShowsItsLastPositionMarkedAsX
+
+	| aView expectedView |
+
+	game _ TicTacToe new.
+	aView := TicTacToeView for: game.
 	
-	! !
+	game markAll: {2 @ 2}.
 
-!TicTacToeConsoleTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertCanNotMarkUsing: aMarkingClosure
+	expectedView := ' | | 
+-----
+ |X| 
+-----
+ | | 
+Playing O'.
 
-	self
-		should: aMarkingClosure 
-		raise: Error - MessageNotUnderstood
-		withExceptionDo: [ :anError |
-			self assert: TicTacToe positionOutsideBoardErrorMessage equals: anError messageText.
-			self assertXIsMarkedOn: {} andOOn: {} ].! !
+	self assert: aView print = expectedView.! !
 
-!TicTacToeConsoleTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertGameIsNotOver
+!TicTacToeObserverTest methodsFor: 'testing' stamp: 'JEC 6/4/2018 01:16:31'!
+test09WhenPlayerOPlaysTheGridShowsItsLastPositionMarkedAsOAndPlayerXLastPositionMarkedAsX
 
-	self deny: game isOver.
-	self deny: game hasPlayerXWon.
-	self deny: game hasPlayerOWon.
-	self deny: game isTied.	! !
+	| aView expectedView |
 
-!TicTacToeConsoleTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertGameIsOver
+	game _ TicTacToe new.
+	aView := TicTacToeView for: game.
 	
-	self assert: game isOver.
+	game markAll: {2 @ 2. 1@1}.
 
-	self deny: game isPlayingX.
-	self deny: game isPlayingO.
-		
-! !
+	expectedView := 'O| | 
+-----
+ |X| 
+-----
+ | | 
+Playing X'.
 
-!TicTacToeConsoleTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertGameIsTied
+	self assert: aView print = expectedView.! !
 
-	self assertGameIsOver.
+!TicTacToeObserverTest methodsFor: 'testing' stamp: 'JEC 6/4/2018 01:19:57'!
+test10WhenPlayerXWinsTheViewShowsThatThePlayerXWon
+
+	| aView expectedView |
+
+	game _ TicTacToe new.
+	aView := TicTacToeView for: game.
 	
-	self deny: game hasPlayerXWon.
-	self deny: game hasPlayerOWon.
-	self assert: game isTied.
-! !
+	game markAll: {1@2. 1@1. 2@2. 1@3. 3@2}.
 
-!TicTacToeConsoleTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertIsPlayingO
+	expectedView := 'O|X|O
+-----
+ |X| 
+-----
+ |X| 
+X Won!!'.
+
+	self assert: aView print = expectedView.! !
+
+!TicTacToeObserverTest methodsFor: 'testing' stamp: 'JEC 6/4/2018 01:22:40'!
+test11WhenPlayerOWinsTheViewShowsThatThePlayerOWon
+
+	| aView expectedView |
+
+	game _ TicTacToe new.
+	aView := TicTacToeView for: game.
 	
-	self deny: game isPlayingX.
-	self assert: game isPlayingO.
-	self assertGameIsNotOver ! !
+	game markAll: {1@2. 1@1. 2@3. 2@1. 3@3. 3@1}.
 
-!TicTacToeConsoleTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertIsPlayingX
-		
-	self assert: game isPlayingX.
-	self deny: game isPlayingO.
-	self assertGameIsNotOver.
-	! !
+	expectedView := 'O|X| 
+-----
+O| |X
+-----
+O| |X
+O Won!!'.
 
-!TicTacToeConsoleTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertOIsMarkedOn: oPositions
-		
-	self assert: oPositions size equals: game playerOPositions size.
-	self assert: (game playerOPositions difference: oPositions) isEmpty.
-! !
+	self assert: aView print = expectedView.! !
 
-!TicTacToeConsoleTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertOWon
+!TicTacToeObserverTest methodsFor: 'testing' stamp: 'JEC 6/4/2018 01:24:50'!
+test12WhenGameIsTiedTheViewShowsIt
 
-	self assertGameIsOver.
+	| aView expectedView |
+
+	game _ TicTacToe new.
+	aView := TicTacToeView for: game.
 	
-	self deny: game hasPlayerXWon.
-	self assert: game hasPlayerOWon.
-	self deny: game isTied.
-! !
+	game markAll: { 2@2. 1@1. 1@3. 3@1. 2@1. 2@3. 1@2. 3@2. 3@3 }.
 
-!TicTacToeConsoleTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertXIsMarkedOn: xPositions
+	expectedView := 'O|X|X
+-----
+X|X|O
+-----
+O|O|X
+Game Tied'.
 
-	self assert: xPositions size equals: game playerXPositions size.
-	self assert: (game playerXPositions difference: xPositions) isEmpty.
-	! !
-
-!TicTacToeConsoleTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertXIsMarkedOn: xPositions andOOn: oPositions
- 
-	self assertXIsMarkedOn: xPositions.
-	self assertOIsMarkedOn: oPositions.
-	! !
-
-!TicTacToeConsoleTest methodsFor: 'assertions' stamp: 'JEC 6/2/2018 11:57:19'!
-assertXWon
-	
-	self assertGameIsOver.
-	
-	self assert: game hasPlayerXWon.
-	self deny: game hasPlayerOWon.
-	self deny: game isTied.
-! !
+	self assert: aView print = expectedView.! !
 
 
 !classDefinition: #TicTacToeTest category: #TicTacToe!
@@ -543,6 +546,30 @@ test26OCanNotMarkWhenGameIsOver
 			self assert: TicTacToe canNotPlayWhenGameIsOverErrorMessage equals: anError messageText.
 			self assertOIsMarkedOn: {2@1. 3@1} ].! !
 
+!TicTacToeTest methodsFor: 'testing' stamp: 'JEC 6/3/2018 21:48:37'!
+test27WhenNonPlayerHasPlayedLastPlayMethodThrowsException
+
+	game _ TicTacToe new.
+	
+	self
+		should: [ game lastPlay ]
+		raise: self functionalException 
+		withExceptionDo: [ :anError |
+			self assert: TicTacToe noPlayerPlayedErrorMessage equals: anError messageText ].! !
+
+!TicTacToeTest methodsFor: 'testing' stamp: 'JEC 6/3/2018 21:49:43'!
+test28WhenAPlayerHasPlayedLastPlayMethodReturnsAnObjectThatCanRespondWhoWasTheLastPlayerAndTheLastPositionPlayed
+
+	| lastPlay |
+
+	game _ TicTacToe new.
+	game markAll: { 2@2 }.
+
+	lastPlay := game lastPlay.
+	
+	self assert: lastPlay lastPlayer = 'X'.
+	self assert: lastPlay lastPositionPlayed = (2@2).! !
+
 
 !TicTacToeTest methodsFor: 'assertions' stamp: 'HAW 10/27/2017 10:29:06'!
 assertCanNotMarkAt: aPosition
@@ -649,7 +676,7 @@ assertXWon
 
 !classDefinition: #TicTacToe category: #TicTacToe!
 Object subclass: #TicTacToe
-	instanceVariableNames: 'state playerOPositions playerXPositions observers'
+	instanceVariableNames: 'state playerOPositions playerXPositions observers lastPlayInfo'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TicTacToe'!
@@ -687,7 +714,7 @@ markWithXAt: aPosition
 	state markWithXAt: aPosition.! !
 
 
-!TicTacToe methodsFor: 'marking board - private' stamp: 'JEC 6/3/2018 00:03:55'!
+!TicTacToe methodsFor: 'marking board - private' stamp: 'JEC 6/3/2018 21:51:05'!
 add: aPosition to: positions nextPlayerState: nextPlayingState winnerState: winnerState
 
 	| newState |
@@ -696,9 +723,11 @@ add: aPosition to: positions nextPlayerState: nextPlayingState winnerState: winn
 
 	newState := (self stateAfterAddingTo: positions with: nextPlayingState and: winnerState) for: self.
 
-	self updateWith: state position: aPosition and: newState.
+	lastPlayInfo := TicTacToeLastPlayInfo withLastState: state withLastPositionPlayed: aPosition andNewState: newState.
 
-	state := newState.! !
+	state := newState.
+	
+	self update.! !
 
 !TicTacToe methodsFor: 'marking board - private' stamp: 'HAW 10/25/2017 15:35:08'!
 assertIsFree: aPosition
@@ -711,7 +740,7 @@ assertIsInBoardBounds: aPosition
 
 	(aPosition between: 1@1 and: 3@3) ifFalse: [ self error: self class positionOutsideBoardErrorMessage ]! !
 
-!TicTacToe methodsFor: 'marking board - private' stamp: 'JEC 6/3/2018 00:04:46'!
+!TicTacToe methodsFor: 'marking board - private' stamp: 'JEC 6/4/2018 01:26:59'!
 markWithOWhenPlayingOAt: aPosition
 
 	self assertIsFree: aPosition.
@@ -721,8 +750,7 @@ markWithOWhenPlayingOAt: aPosition
 		to: playerOPositions
 		nextPlayerState: PlayingX
 		winnerState: PlayerOWon.
-		
-"	self updateWithPlayer: 'O' andPosition: aPosition."! !
+! !
 
 !TicTacToe methodsFor: 'marking board - private' stamp: 'HAW 10/26/2017 12:30:01'!
 markWithOWhenPlayingXAt: aPosition
@@ -732,7 +760,7 @@ markWithOWhenPlayingXAt: aPosition
 markWithXWhenPlayingOAt: aPoint
 	self error: self class notXTurnErrorMessage.! !
 
-!TicTacToe methodsFor: 'marking board - private' stamp: 'JEC 6/3/2018 00:04:40'!
+!TicTacToe methodsFor: 'marking board - private' stamp: 'JEC 6/4/2018 01:27:08'!
 markWithXWhenPlayingXAt: aPosition
 
 	self assertIsFree: aPosition.
@@ -741,10 +769,7 @@ markWithXWhenPlayingXAt: aPosition
 		add: aPosition
 		to: playerXPositions
 		nextPlayerState: PlayingO
-		winnerState: PlayerXWon.
-
-"	self updateWithPlayer: 'X' andPosition: aPosition."
-! !
+		winnerState: PlayerXWon.! !
 
 !TicTacToe methodsFor: 'marking board - private' stamp: 'HAW 10/26/2017 12:44:57'!
 stateAfterAddingTo: positions with: nextPlayingState and: winnerState
@@ -753,18 +778,6 @@ stateAfterAddingTo: positions with: nextPlayingState and: winnerState
 	self shouldBeTiedWhenNoOneWon ifTrue: [ ^ GameTied ].
 
 	^ nextPlayingState.! !
-
-!TicTacToe methodsFor: 'marking board - private' stamp: 'JEC 6/3/2018 00:29:39'!
-updateWith: actualState position: aPosition and: newState
-
-	| actualPlayerStr newStateStr |
-
-	actualPlayerStr := actualState printPlayer.
-	newStateStr := newState printState.
-	
-	observers do: [ :observer | 
-			observer notify: actualPlayerStr, ' marcó en ', aPosition asString; notify: newStateStr.
-		].! !
 
 
 !TicTacToe methodsFor: 'testing game result' stamp: 'HAW 10/25/2017 16:14:31'!
@@ -863,23 +876,31 @@ shouldBeTiedWhenNoOneWon
 	^ playerXPositions size = 5 and: [ playerOPositions size = 4 ].! !
 
 
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 6/2/2018 23:32:48'!
+!TicTacToe methodsFor: 'private' stamp: 'JEC 6/2/2018 23:32:48'!
 attach: aNewObserver
 
 	observers add: aNewObserver! !
 
-!TicTacToe methodsFor: 'as yet unclassified' stamp: 'JEC 6/2/2018 23:54:01'!
-updateWithPlayer: aPlayer andPosition: aPosition 
+!TicTacToe methodsFor: 'private' stamp: 'JEC 6/3/2018 21:55:37'!
+update
+	
+	observers do: [ :observer | observer notify: lastPlayInfo ]! !
 
-	observers do: [ :observer |
-		observer notify: aPlayer, ' marcó en ', aPosition asString.
 
-		(self hasWin: playerOPositions)
-			ifTrue: [ observer notify: 'Estado: Juego terminado - Ganó ', aPlayer, '!!'].
+!TicTacToe methodsFor: 'playing turn info' stamp: 'JEC 6/4/2018 01:33:01'!
+lastPlay
 
-		((self hasWin: playerOPositions) not and: [self isTied not])
-			ifTrue: [observer notify: 'Estado: Jugando X'].
-		].! !
+	self assertIsNewGame.
+	
+	^lastPlayInfo
+	! !
+
+
+!TicTacToe methodsFor: 'playing turn info - private' stamp: 'JEC 6/4/2018 01:32:45'!
+assertIsNewGame
+
+	playerXPositions isEmpty ifTrue: [ self error: self class noPlayerPlayedErrorMessage ].
+! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -887,59 +908,146 @@ updateWithPlayer: aPlayer andPosition: aPosition
 TicTacToe class
 	instanceVariableNames: ''!
 
-!TicTacToe class methodsFor: 'as yet unclassified' stamp: 'HAW 10/24/2017 17:12:48'!
+!TicTacToe class methodsFor: 'error messages' stamp: 'HAW 10/24/2017 17:12:48'!
 canNotPlayWhenGameIsOverErrorMessage
 	
 	^'Can not play when game is over'! !
 
-!TicTacToe class methodsFor: 'as yet unclassified' stamp: 'HAW 10/24/2017 17:12:48'!
+!TicTacToe class methodsFor: 'error messages' stamp: 'JEC 6/3/2018 17:51:37'!
+noPlayerPlayedErrorMessage
+	
+	^'No player has played'! !
+
+!TicTacToe class methodsFor: 'error messages' stamp: 'HAW 10/24/2017 17:12:48'!
 notOTurnErrorMessage
 	
 	^'Not O''s turn'! !
 
-!TicTacToe class methodsFor: 'as yet unclassified' stamp: 'HAW 10/24/2017 17:12:48'!
+!TicTacToe class methodsFor: 'error messages' stamp: 'HAW 10/24/2017 17:12:48'!
 notXTurnErrorMessage
 	
 	^'Not X''s turn'! !
 
-!TicTacToe class methodsFor: 'as yet unclassified' stamp: 'HAW 10/27/2017 10:26:31'!
+!TicTacToe class methodsFor: 'error messages' stamp: 'HAW 10/27/2017 10:26:31'!
 positionOutsideBoardErrorMessage
 	
 	^'Position is outside board'! !
 
-!TicTacToe class methodsFor: 'as yet unclassified' stamp: 'HAW 10/24/2017 17:12:48'!
+!TicTacToe class methodsFor: 'error messages' stamp: 'HAW 10/24/2017 17:12:48'!
 positionTakenErrorMessage
 	
 	^'Position taken'! !
 
 
+!classDefinition: #TicTacToeLastPlayInfo category: #TicTacToe!
+Object subclass: #TicTacToeLastPlayInfo
+	instanceVariableNames: 'lastPositionPlayed actualState lastState'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TicTacToe'!
+
+!TicTacToeLastPlayInfo methodsFor: 'last play status' stamp: 'JEC 6/4/2018 01:08:38'!
+actualState
+
+	^'Estado: ', actualState printState.! !
+
+!TicTacToeLastPlayInfo methodsFor: 'last play status' stamp: 'JEC 6/3/2018 21:44:28'!
+lastPlayer
+	
+	^lastState printPlayer! !
+
+!TicTacToeLastPlayInfo methodsFor: 'last play status' stamp: 'JEC 6/3/2018 21:45:09'!
+lastPositionPlayed
+
+	^lastPositionPlayed! !
+
+!TicTacToeLastPlayInfo methodsFor: 'last play status' stamp: 'JEC 6/4/2018 01:10:13'!
+shortState
+
+	^ actualState printShortState! !
+
+
+!TicTacToeLastPlayInfo methodsFor: 'initialization' stamp: 'JEC 6/3/2018 21:45:16'!
+initializeForLastState: aLastState lastPositionPlayed: aPosition andActualState: newState.
+
+	lastState := aLastState.
+	lastPositionPlayed := aPosition.
+	actualState := newState.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TicTacToeLastPlayInfo class' category: #TicTacToe!
+TicTacToeLastPlayInfo class
+	instanceVariableNames: ''!
+
+!TicTacToeLastPlayInfo class methodsFor: 'instance creation' stamp: 'JEC 6/3/2018 21:38:24'!
+withLastState: aLastState withLastPositionPlayed: aPosition andNewState: newState
+
+	^self new initializeForLastState: aLastState lastPositionPlayed: aPosition andActualState: newState.
+	! !
+
+
+!classDefinition: #TicTacToeObserver category: #TicTacToe!
+Object subclass: #TicTacToeObserver
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TicTacToe'!
+
+!TicTacToeObserver methodsFor: 'initialization' stamp: 'JEC 6/4/2018 00:48:28'!
+intializeFor: aTicTacToe
+
+	self subclassResponsibility ! !
+
+
+!TicTacToeObserver methodsFor: 'print' stamp: 'JEC 6/4/2018 00:48:35'!
+print
+
+	self subclassResponsibility ! !
+
+
+!TicTacToeObserver methodsFor: 'private' stamp: 'JEC 6/4/2018 00:48:42'!
+notify: aLastPlayInfo
+
+	self subclassResponsibility ! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TicTacToeObserver class' category: #TicTacToe!
+TicTacToeObserver class
+	instanceVariableNames: 'grid'!
+
+!TicTacToeObserver class methodsFor: 'instance creation' stamp: 'JEC 6/4/2018 00:50:22'!
+for: aTicTacToe
+
+	self subclassResponsibility ! !
+
+
 !classDefinition: #TicTacToeConsole category: #TicTacToe!
-Object subclass: #TicTacToeConsole
+TicTacToeObserver subclass: #TicTacToeConsole
 	instanceVariableNames: 'game log'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TicTacToe'!
 
-!TicTacToeConsole methodsFor: 'as yet unclassified' stamp: 'JEC 6/2/2018 23:35:55'!
+!TicTacToeConsole methodsFor: 'print' stamp: 'JEC 6/3/2018 22:27:25'!
+print
+
+	^log! !
+
+
+!TicTacToeConsole methodsFor: 'initialization' stamp: 'JEC 6/2/2018 23:35:55'!
 intializeFor: aTicTacToe
 
 	game := aTicTacToe.
 	log := OrderedCollection new.! !
 
-!TicTacToeConsole methodsFor: 'as yet unclassified' stamp: 'JEC 6/2/2018 23:36:13'!
-log
 
-	^log! !
+!TicTacToeConsole methodsFor: 'private' stamp: 'JEC 6/3/2018 21:54:54'!
+notify: aLastPlayInfo
 
-!TicTacToeConsole methodsFor: 'as yet unclassified' stamp: 'JEC 6/2/2018 23:46:23'!
-notify: aNewNotificationFromTicTacToe
-
-	log add: aNewNotificationFromTicTacToe ! !
-
-!TicTacToeConsole methodsFor: 'as yet unclassified' stamp: 'JEC 6/2/2018 23:46:40'!
-printLog
-
-	^log! !
+	log add: aLastPlayInfo lastPlayer, ' marcó en ', aLastPlayInfo lastPositionPlayed asString;
+		add: aLastPlayInfo actualState.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -956,6 +1064,79 @@ for: aTicTacToe
 	aTicTacToe attach: aNewTicTacToeConsole.
 
 	^ aNewTicTacToeConsole! !
+
+
+!classDefinition: #TicTacToeView category: #TicTacToe!
+TicTacToeObserver subclass: #TicTacToeView
+	instanceVariableNames: 'game lastPlayInfoCollection grid positionsDictionary nextState'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TicTacToe'!
+
+!TicTacToeView methodsFor: 'initialization' stamp: 'JEC 6/4/2018 00:54:37'!
+intializeFor: aTicTacToe
+
+	game := aTicTacToe.
+	lastPlayInfoCollection := OrderedCollection new.
+	
+	grid := ' | | 
+-----
+ | | 
+-----
+ | | ' asOrderedCollection.
+
+	positionsDictionary := Dictionary new.
+	positionsDictionary 
+				add: 1@1 -> 1; 
+				add: 1@2 -> 3; 
+				add: 1@3 -> 5;
+				add: 2@1 -> 13; 
+				add: 2@2 -> 15; 
+				add: 2@3 -> 17;
+				add: 3@1 -> 25; 
+				add: 3@2 -> 27; 
+				add: 3@3 -> 29.
+	
+	nextState := ''.! !
+
+
+!TicTacToeView methodsFor: 'print' stamp: 'JEC 6/4/2018 01:15:52'!
+print
+
+	| aStrGrid |
+	
+	aStrGrid := String new: 29.
+	
+	(1 to: 29) do: [ :index | aStrGrid at: index put: (grid at: index) ].
+	
+	^aStrGrid append: nextState.! !
+
+
+!TicTacToeView methodsFor: 'private' stamp: 'JEC 6/4/2018 01:15:13'!
+notify: aLastPlayInfo
+
+	lastPlayInfoCollection add: aLastPlayInfo.
+	
+	grid at: (positionsDictionary at: aLastPlayInfo lastPositionPlayed) put: aLastPlayInfo lastPlayer asCharacter.
+	
+	nextState := '
+' append: aLastPlayInfo shortState.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TicTacToeView class' category: #TicTacToe!
+TicTacToeView class
+	instanceVariableNames: 'grid'!
+
+!TicTacToeView class methodsFor: 'instance creation' stamp: 'JEC 6/3/2018 23:24:53'!
+for: aTicTacToe
+
+	| aNewTicTacToeView |
+	
+	aNewTicTacToeView := self new intializeFor: aTicTacToe.
+	aTicTacToe attach: aNewTicTacToeView.
+
+	^ aNewTicTacToeView! !
 
 
 !classDefinition: #TicTacToeState category: #TicTacToe!
@@ -1087,10 +1268,15 @@ isTied
 	^true! !
 
 
-!GameTied methodsFor: 'print' stamp: 'JEC 6/3/2018 00:32:02'!
+!GameTied methodsFor: 'print' stamp: 'JEC 6/4/2018 01:08:08'!
+printShortState
+
+	^'Game Tied'! !
+
+!GameTied methodsFor: 'print' stamp: 'JEC 6/4/2018 01:04:55'!
 printState
 
-	^'Estado: Juego terminado - Empate'! !
+	^'Juego terminado - Empate'! !
 
 
 !classDefinition: #PlayerOWon category: #TicTacToe!
@@ -1114,10 +1300,15 @@ isTied
 	^false! !
 
 
-!PlayerOWon methodsFor: 'print' stamp: 'JEC 6/3/2018 00:30:28'!
+!PlayerOWon methodsFor: 'print' stamp: 'JEC 6/4/2018 01:07:10'!
+printShortState
+
+	^'O Won!!'! !
+
+!PlayerOWon methodsFor: 'print' stamp: 'JEC 6/4/2018 01:05:04'!
 printState
 
-	^'Estado: Juego terminado - Ganó O!!'! !
+	^'Juego terminado - Ganó O!!'! !
 
 
 !classDefinition: #PlayerXWon category: #TicTacToe!
@@ -1141,10 +1332,15 @@ isTied
 	^false! !
 
 
-!PlayerXWon methodsFor: 'print' stamp: 'JEC 6/3/2018 00:30:44'!
+!PlayerXWon methodsFor: 'print' stamp: 'JEC 6/4/2018 01:07:26'!
+printShortState
+
+	^'X Won!!'! !
+
+!PlayerXWon methodsFor: 'print' stamp: 'JEC 6/4/2018 01:05:14'!
 printState
 
-	^'Estado: Juego terminado - Ganó X!!'! !
+	^'Juego terminado - Ganó X!!'! !
 
 
 !classDefinition: #PlayingState category: #TicTacToe!
@@ -1210,10 +1406,15 @@ printPlayer
 
 	^ 'O'! !
 
-!PlayingO methodsFor: 'print' stamp: 'JEC 6/3/2018 00:34:09'!
+!PlayingO methodsFor: 'print' stamp: 'JEC 6/4/2018 01:07:41'!
+printShortState
+
+	^'Playing O'! !
+
+!PlayingO methodsFor: 'print' stamp: 'JEC 6/4/2018 01:05:29'!
 printState
 
-	^'Estado: Jugando O'! !
+	^'Jugando O'! !
 
 
 !classDefinition: #PlayingX category: #TicTacToe!
@@ -1253,7 +1454,12 @@ printPlayer
 
 	^ 'X'! !
 
-!PlayingX methodsFor: 'print' stamp: 'JEC 6/3/2018 00:34:15'!
+!PlayingX methodsFor: 'print' stamp: 'JEC 6/4/2018 01:07:54'!
+printShortState
+
+	^'Playing X'! !
+
+!PlayingX methodsFor: 'print' stamp: 'JEC 6/4/2018 01:05:39'!
 printState
 
-	^'Estado: Jugando X'! !
+	^'Jugando X'! !
