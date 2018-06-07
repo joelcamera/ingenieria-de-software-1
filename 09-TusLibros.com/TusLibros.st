@@ -1,6 +1,6 @@
 !classDefinition: #CartTest category: #TusLibros!
 TestCase subclass: #CartTest
-	instanceVariableNames: 'aBook aBookQuantity anotherBook anotherBookQuantity aCatalogue aCart'
+	instanceVariableNames: 'aBook aBookQuantity anotherBook anotherBookQuantity aCatalogue aCart aBookPrice'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -18,14 +18,14 @@ test02AfterAddingSomeBooksTheCartItIsNotEmptyAndItsSizeIsTheQuantityOfAllBooks
 	self deny: aCart isEmpty.
 	self assert: aCart size = aBookQuantity.! !
 
-!CartTest methodsFor: 'testing' stamp: 'JEC 6/6/2018 22:29:17'!
+!CartTest methodsFor: 'testing' stamp: 'JEC 6/7/2018 19:26:13'!
 test03CanAddMoreThanOneBookToTheCart
 
 	aCart add: aBook with: aBookQuantity.
 	aCart add: anotherBook with: anotherBookQuantity.
 
-	self assert: (aCart books includes: aBook).
-	self assert: (aCart books includes: anotherBook).! !
+	self assert: (aCart includes: aBook).
+	self assert: (aCart includes: anotherBook).! !
 
 !CartTest methodsFor: 'testing' stamp: 'JEC 6/6/2018 22:33:54'!
 test05CanGetAllTheBookFromTheCart
@@ -77,17 +77,93 @@ test08CannotAddABookWithQuantityLessThanOne
 			self assert: aCart isEmpty.
 ].! !
 
+!CartTest methodsFor: 'testing' stamp: 'JEC 6/7/2018 18:50:12'!
+test09CannotAddABookWithQuantityNonInteger
 
-!CartTest methodsFor: 'setUp' stamp: 'JEC 6/6/2018 22:32:55'!
+	| aNonIntegerQuantity |
+
+	aNonIntegerQuantity := 1.1.
+
+	self
+		should: [ aCart add: aBook with: aNonIntegerQuantity ]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:anError | 
+			self assert: Cart cannotAddABookWithANonIntegerQuantityErrorMessage equals: anError messageText.
+			self assert: aCart isEmpty.
+].! !
+
+
+!CartTest methodsFor: 'setUp' stamp: 'JEC 6/7/2018 19:25:45'!
 setUp
 
 	aBook := 'a book'.
 	aBookQuantity := 2.
 	anotherBook := 'another book'.
 	anotherBookQuantity := 3.
-	aCatalogue := OrderedCollection with: aBook with: anotherBook.
+	aBookPrice := 1.
+	aCatalogue := Dictionary new.
+	aCatalogue add: aBook -> aBookPrice; add: anotherBook -> aBookPrice.
 	aCart := Cart with: aCatalogue.
 	! !
+
+
+!classDefinition: #CashierTest category: #TusLibros!
+TestCase subclass: #CashierTest
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!CashierTest methodsFor: 'as yet unclassified' stamp: 'JEC 6/7/2018 19:39:56'!
+test01CannotCheckoutAnEmptyCart
+
+	| aCashier anEmptyCart aCatalogue |
+
+	aCatalogue := Dictionary new.
+	anEmptyCart := Cart with: aCatalogue.
+	aCashier := Cashier with: aCatalogue.
+
+	self
+		should: [ aCashier checkout: anEmptyCart ]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:anError | 
+			self assert: Cashier cannotCheckoutAnEmptyCart equals: anError messageText ].! !
+
+!CashierTest methodsFor: 'as yet unclassified' stamp: 'JEC 6/7/2018 19:54:16'!
+test02CheckingoutACartWithOneBookAndACreditCardReturnThePriceToPay
+
+	| aCashier aNonEmptyCart aCatalogue aCreditCard expectedPriceToPay aBook aPrice aQuantity |
+
+	aBook := 'a book'.
+	aQuantity := 1.
+	aPrice := 2.
+	aCatalogue := Dictionary new.
+	aCatalogue add: aBook -> aPrice.
+	aNonEmptyCart := Cart with: aCatalogue.
+	aNonEmptyCart add: aBook with: aQuantity.
+	aCashier := Cashier with: aCatalogue.
+	
+	expectedPriceToPay := 2.
+
+	self assert: (aCashier checkout: aNonEmptyCart) = expectedPriceToPay.! !
+
+!CashierTest methodsFor: 'as yet unclassified' stamp: 'JEC 6/7/2018 19:40:55'!
+test02CheckingoutACartWithOneBookReturnThePriceToPay
+
+	| aCashier aNonEmptyCart aCatalogue expectedPriceToPay aBook aPrice aQuantity |
+
+	aBook := 'a book'.
+	aQuantity := 1.
+	aPrice := 2.
+	aCatalogue := Dictionary new.
+	aCatalogue add: aBook -> aPrice.
+	aNonEmptyCart := Cart with: aCatalogue.
+	aNonEmptyCart add: aBook with: aQuantity.
+	aCashier := Cashier with: aCatalogue.
+	
+	expectedPriceToPay := 2.
+
+	self assert: (aCashier checkout: aNonEmptyCart) = expectedPriceToPay.! !
 
 
 !classDefinition: #Cart category: #TusLibros!
@@ -125,11 +201,17 @@ isEmpty
 	^books isEmpty.! !
 
 
-!Cart methodsFor: 'private' stamp: 'JEC 6/6/2018 19:46:30'!
+!Cart methodsFor: 'private' stamp: 'JEC 6/7/2018 19:21:18'!
 assertBookInCart: aBook
 
-	(catalogue includes: aBook)
+	(catalogue includesKey: aBook)
 		ifFalse: [ self error: self class cannotAddABookThatIsNotInTheCatalogueErrorMessage ].! !
+
+!Cart methodsFor: 'private' stamp: 'JEC 6/7/2018 19:01:32'!
+assertQuantityIsAnInteger: aQuantity
+
+	aQuantity isInteger 
+		ifFalse: [ self error: self class cannotAddABookWithANonIntegerQuantityErrorMessage ].! !
 
 !Cart methodsFor: 'private' stamp: 'JEC 6/6/2018 19:46:05'!
 assertQuantityIsMoreOrEqualThanOne: aQuantity
@@ -138,11 +220,12 @@ assertQuantityIsMoreOrEqualThanOne: aQuantity
 		ifTrue: [self error: self class cannotAddABookWithQuantityLessThanOneErrorMessage ].! !
 
 
-!Cart methodsFor: 'adding' stamp: 'JEC 6/6/2018 20:07:48'!
+!Cart methodsFor: 'adding' stamp: 'JEC 6/7/2018 19:01:13'!
 add: aBook with: aQuantity
 
 	self assertBookInCart: aBook.
 	self assertQuantityIsMoreOrEqualThanOne: aQuantity.
+	self assertQuantityIsAnInteger: aQuantity.
 
 	(1 to: aQuantity) do: [ :index | books add: aBook ].! !
 
@@ -151,6 +234,12 @@ add: aBook with: aQuantity
 size
 
 	^books size! !
+
+
+!Cart methodsFor: 'as yet unclassified' stamp: 'JEC 6/7/2018 19:26:51'!
+includes: aBook
+
+	^books includes: aBook.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -173,3 +262,66 @@ cannotAddABookThatIsNotInTheCatalogueErrorMessage
 cannotAddABookWithQuantityLessThanOneErrorMessage
 	
 	^'Cannot add a book with quantity less than one'.! !
+
+
+!Cart class methodsFor: 'as yet unclassified' stamp: 'JEC 6/7/2018 18:53:17'!
+cannotAddABookWithANonIntegerQuantityErrorMessage
+	
+	^'Cannot add a Book with a non integer quantity'! !
+
+
+!classDefinition: #Cashier category: #TusLibros!
+Object subclass: #Cashier
+	instanceVariableNames: 'catalogue'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!Cashier methodsFor: 'as yet unclassified' stamp: 'JEC 6/7/2018 19:45:56'!
+assertCartIsNotEmpty: aCart
+
+	aCart isEmpty
+		ifTrue: [ self error: self class cannotCheckoutAnEmptyCart ].! !
+
+!Cashier methodsFor: 'as yet unclassified' stamp: 'JEC 6/7/2018 19:45:36'!
+checkout: aCart 
+
+	| booksWithQuantity totalPrice |
+
+	self assertCartIsNotEmpty: aCart.
+
+	booksWithQuantity := aCart booksWithQuantity.
+
+	totalPrice := 0.
+	booksWithQuantity keysAndValuesDo: [ :aKey :aValue | totalPrice := totalPrice + ((catalogue at: aKey) * aValue) ].
+	
+	^totalPrice.! !
+
+!Cashier methodsFor: 'as yet unclassified' stamp: 'JEC 6/7/2018 19:35:18'!
+initializeWith: aCatalogue
+
+	catalogue := aCatalogue.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Cashier class' category: #TusLibros!
+Cashier class
+	instanceVariableNames: ''!
+
+!Cashier class methodsFor: 'as yet unclassified' stamp: 'JEC 6/7/2018 19:00:40'!
+cannotCheckoutAnEmptyCart
+
+	^'Cannot checkout an empty cart'! !
+
+!Cashier class methodsFor: 'as yet unclassified' stamp: 'JEC 6/7/2018 19:34:49'!
+with: aCatalogue
+
+	^self new initializeWith: aCatalogue.! !
+
+
+!classDefinition: #CreditCard category: #TusLibros!
+Object subclass: #CreditCard
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
