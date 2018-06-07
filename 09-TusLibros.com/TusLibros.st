@@ -1,47 +1,93 @@
 !classDefinition: #CartTest category: #TusLibros!
 TestCase subclass: #CartTest
-	instanceVariableNames: ''
+	instanceVariableNames: 'aBook aBookQuantity anotherBook anotherBookQuantity aCatalogue aCart'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!CartTest methodsFor: 'as yet unclassified' stamp: 'JEC 6/4/2018 21:37:04'!
+!CartTest methodsFor: 'testing' stamp: 'JEC 6/6/2018 22:27:39'!
 test01WhenCreatingANewCartCreatesAnEmptyCart
-
-	| aCart aCatalogue |
-
-	aCatalogue := OrderedCollection new.
-	aCart := Cart with: aCatalogue.
 
 	self assert: aCart isEmpty.! !
 
-!CartTest methodsFor: 'as yet unclassified' stamp: 'JEC 6/4/2018 21:31:45'!
-test02WhenAddingABookToTheCartItIsNotEmpty
+!CartTest methodsFor: 'testing' stamp: 'JEC 6/6/2018 22:32:57'!
+test02AfterAddingSomeBooksTheCartItIsNotEmptyAndItsSizeIsTheQuantityOfAllBooks
 
-	| aCart aCatalogue aBook |
+	aCart add: aBook with: aBookQuantity.
+
+	self deny: aCart isEmpty.
+	self assert: aCart size = aBookQuantity.! !
+
+!CartTest methodsFor: 'testing' stamp: 'JEC 6/6/2018 22:29:17'!
+test03CanAddMoreThanOneBookToTheCart
+
+	aCart add: aBook with: aBookQuantity.
+	aCart add: anotherBook with: anotherBookQuantity.
+
+	self assert: (aCart books includes: aBook).
+	self assert: (aCart books includes: anotherBook).! !
+
+!CartTest methodsFor: 'testing' stamp: 'JEC 6/6/2018 22:33:54'!
+test05CanGetAllTheBookFromTheCart
 	
-	aBook := 'a book'.
-	aCatalogue := OrderedCollection with: aBook.
-	aCart := Cart with: aCatalogue.
+	aCart add: aBook with: aBookQuantity.
+	aCart add: anotherBook with: anotherBookQuantity.
+	
+	self assert: aCart books = (Set with: aBook with: anotherBook).! !
 
-	aCart add: aBook.
+!CartTest methodsFor: 'testing' stamp: 'JEC 6/6/2018 22:34:36'!
+test06CanGetAllTheBookWithTheirQuantity
 
-	self deny: aCart isEmpty.! !
+	| expectedDictionary |
 
-!CartTest methodsFor: 'as yet unclassified' stamp: 'JEC 6/4/2018 21:26:09'!
-test03CannotAddABookToACartThatIsNotInItsCatalogue
+	aCart add: aBook with: aBookQuantity.
+	aCart add: anotherBook with: anotherBookQuantity.
+	
+	expectedDictionary := Dictionary new.
+	expectedDictionary add: aBook -> aBookQuantity; add: anotherBook -> anotherBookQuantity.
+	
+	self assert: aCart booksWithQuantity = expectedDictionary.! !
 
-	| aCart aCatalogue aBook |
+!CartTest methodsFor: 'testing' stamp: 'JEC 6/6/2018 22:38:26'!
+test07CannotAddABookToACartThatIsNotInItsCatalogue
 
-	aCatalogue := OrderedCollection new.
-	aCart := Cart with: aCatalogue.
-	aBook := 'a book'.
+	| aNonCataloguedBook aQuantity |
+	
+	aNonCataloguedBook := 'a non catalogued book'.
+	aQuantity := 1.
 
 	self
-		should: [ aCart add: aBook ]
+		should: [ aCart add: aNonCataloguedBook with: aQuantity ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
 			self assert: Cart cannotAddABookThatIsNotInTheCatalogueErrorMessage equals: anError messageText ].! !
+
+!CartTest methodsFor: 'testing' stamp: 'JEC 6/6/2018 22:37:32'!
+test08CannotAddABookWithQuantityLessThanOne
+
+	| aNonPositiveQuantity |
+
+	aNonPositiveQuantity := 0.
+
+	self
+		should: [ aCart add: aBook with: aNonPositiveQuantity ]
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [:anError | 
+			self assert: Cart cannotAddABookWithQuantityLessThanOneErrorMessage equals: anError messageText.
+			self assert: aCart isEmpty.
+].! !
+
+
+!CartTest methodsFor: 'setUp' stamp: 'JEC 6/6/2018 22:32:55'!
+setUp
+
+	aBook := 'a book'.
+	aBookQuantity := 2.
+	anotherBook := 'another book'.
+	anotherBookQuantity := 3.
+	aCatalogue := OrderedCollection with: aBook with: anotherBook.
+	aCart := Cart with: aCatalogue.
+	! !
 
 
 !classDefinition: #Cart category: #TusLibros!
@@ -51,29 +97,60 @@ Object subclass: #Cart
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Cart methodsFor: 'as yet unclassified' stamp: 'JEC 6/4/2018 21:30:02'!
-add: aBook
+!Cart methodsFor: 'books' stamp: 'JEC 6/6/2018 22:44:30'!
+books
 
-	(catalogue includes: aBook) ifFalse: [ self error: self class cannotAddABookThatIsNotInTheCatalogueErrorMessage ].
+	^books asSet.! !
 
-	books add: aBook.! !
+!Cart methodsFor: 'books' stamp: 'JEC 6/6/2018 21:10:43'!
+booksWithQuantity
 
-!Cart methodsFor: 'as yet unclassified' stamp: 'JEC 6/4/2018 21:27:30'!
+	| booksSet |
+	
+	booksSet := books asSet.
+
+	^ booksSet inject: Dictionary new into: [ :aDictionary :aBook | aDictionary add: aBook -> (books occurrencesOf: aBook); yourself ]! !
+
+
+!Cart methodsFor: 'initialization' stamp: 'JEC 6/6/2018 20:06:23'!
 initializeWith: aCatalogue
 
 	books := OrderedCollection new.
 	catalogue := aCatalogue.! !
 
-!Cart methodsFor: 'as yet unclassified' stamp: 'JEC 6/4/2018 21:21:28'!
+
+!Cart methodsFor: 'testing' stamp: 'JEC 6/4/2018 21:21:28'!
 isEmpty
 	
 	^books isEmpty.! !
 
 
-!Cart methodsFor: 'initialize' stamp: 'JEC 6/4/2018 21:19:48'!
-initialize
+!Cart methodsFor: 'private' stamp: 'JEC 6/6/2018 19:46:30'!
+assertBookInCart: aBook
 
-	books := OrderedCollection new.! !
+	(catalogue includes: aBook)
+		ifFalse: [ self error: self class cannotAddABookThatIsNotInTheCatalogueErrorMessage ].! !
+
+!Cart methodsFor: 'private' stamp: 'JEC 6/6/2018 19:46:05'!
+assertQuantityIsMoreOrEqualThanOne: aQuantity
+	
+	(aQuantity < 1)
+		ifTrue: [self error: self class cannotAddABookWithQuantityLessThanOneErrorMessage ].! !
+
+
+!Cart methodsFor: 'adding' stamp: 'JEC 6/6/2018 20:07:48'!
+add: aBook with: aQuantity
+
+	self assertBookInCart: aBook.
+	self assertQuantityIsMoreOrEqualThanOne: aQuantity.
+
+	(1 to: aQuantity) do: [ :index | books add: aBook ].! !
+
+
+!Cart methodsFor: 'accessing' stamp: 'JEC 6/6/2018 20:23:51'!
+size
+
+	^books size! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -81,7 +158,7 @@ initialize
 Cart class
 	instanceVariableNames: ''!
 
-!Cart class methodsFor: 'as yet unclassified' stamp: 'JEC 6/4/2018 21:26:50'!
+!Cart class methodsFor: 'instance creation' stamp: 'JEC 6/4/2018 21:26:50'!
 with: aCatalogue
 
 	^self new initializeWith: aCatalogue.! !
@@ -91,3 +168,8 @@ with: aCatalogue
 cannotAddABookThatIsNotInTheCatalogueErrorMessage
 
 	^'Cannot add a book that is not in the catalogue'! !
+
+!Cart class methodsFor: 'error messages' stamp: 'JEC 6/6/2018 19:43:39'!
+cannotAddABookWithQuantityLessThanOneErrorMessage
+	
+	^'Cannot add a book with quantity less than one'.! !
