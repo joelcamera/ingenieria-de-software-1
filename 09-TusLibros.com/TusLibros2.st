@@ -182,7 +182,7 @@ test06CheckingOutWithExpiredCreditCardMustRaiseException
 			self assert: aSalesRegister isEmpty ].
 ! !
 
-!CheckOutTest methodsFor: 'testing' stamp: 'JEC 6/10/2018 23:03:20'!
+!CheckOutTest methodsFor: 'testing' stamp: 'GAC 6/11/2018 16:29:26'!
 test07CheckingOutWithIncorrectMonthOfYearIntervalCreditCardMustRaiseException
 
 	aCart add: ObjectFactory validBook with: aBookQuantity.
@@ -191,7 +191,7 @@ test07CheckingOutWithIncorrectMonthOfYearIntervalCreditCardMustRaiseException
 		should: [ aCashier checkout: aCart with: ObjectFactory incorrectMonthOfYearIntervalCreditCard ]
 		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
-			self assert: Cashier cannotCheckoutWithAnExpiredCreditCardErrorMessage equals: anError messageText.
+			self assert: CreditCard cannotExistWithAnIncorrectMonthOfYearIntervalCreditCardErrorMessage equals: anError messageText.
 			self assert: aSalesRegister isEmpty ].
 ! !
 
@@ -357,21 +357,11 @@ assertThatTheCartIsNotEmpty: aCart
 		ifTrue: [self error: self class cannotCheckoutAnEmptyCartErrorMessage ].
 ! !
 
-!Cashier methodsFor: 'private' stamp: 'JEC 6/10/2018 23:09:17'!
-assertThatTheCreditCardHasACorrectInterval: aCreditCard
-	
-	(aCreditCard fromMonthOfYear start <= aCreditCard toMonthOfYear end)
-		ifFalse: [ self error: self class cannotCheckoutWithAnIncorrectMonthOfYearIntervalCreditCardErrorMessage ].! !
-
-!Cashier methodsFor: 'private' stamp: 'JEC 6/10/2018 23:05:24'!
+!Cashier methodsFor: 'private' stamp: 'GAC 6/11/2018 16:00:46'!
 assertThatTheCreditCardIsNotExpired: aCreditCard 
-
-	| aTimeSpan |
-
-	aTimeSpan := aCreditCard fromMonthOfYear start to: aCreditCard toMonthOfYear end.
 	
-	(aTimeSpan includes: clock now)
-		ifFalse: [ self error: self class cannotCheckoutWithAnExpiredCreditCardErrorMessage ].! !
+	(aCreditCard isExpiredOnDate: clock)
+		ifTrue: [ self error: self class cannotCheckoutWithAnExpiredCreditCardErrorMessage ].! !
 
 !Cashier methodsFor: 'private' stamp: 'JEC 6/10/2018 17:23:49'!
 nextTransactionId
@@ -389,14 +379,13 @@ initializeWith: aSalesRegister and: aCalendarClock
 	clock := aCalendarClock.! !
 
 
-!Cashier methodsFor: 'check out' stamp: 'JEC 6/10/2018 23:07:02'!
+!Cashier methodsFor: 'check out' stamp: 'GAC 6/11/2018 16:26:09'!
 checkout: aCart with: aCreditCard 
 
 	| aSale |
 
 	self assertThatTheCartIsNotEmpty: aCart .
 	self assertThatTheCreditCardIsNotExpired: aCreditCard.
-	self assertThatTheCreditCardHasACorrectInterval: aCreditCard.
 
 	aSale := Sale with: aCart booksWithQuantity and: aCart totalPrice.
 	salesRegister add: aSale.
@@ -443,25 +432,46 @@ fromMonthOfYear
 
 	^from copy.! !
 
+!CreditCard methodsFor: 'accessing' stamp: 'GAC 6/11/2018 16:00:18'!
+isExpiredOnDate: aDate 
+
+	| aTimeSpan |
+
+	aTimeSpan := self fromMonthOfYear start to: self toMonthOfYear end.
+	
+	^ (aTimeSpan includes: aDate now) not
+! !
+
 !CreditCard methodsFor: 'accessing' stamp: 'JEC 6/10/2018 22:50:21'!
 toMonthOfYear
 
 	^ to copy.! !
 
 
-!CreditCard methodsFor: 'initialization' stamp: 'JEC 6/10/2018 19:41:07'!
+!CreditCard methodsFor: 'initialization' stamp: 'GAC 6/11/2018 16:29:53'!
 initializeWithName: aPersonName creditCardNumber: aCreditCardNumber from: aFromDate to: aToDate
 
 	person := aPersonName.
 	creditCardNumber := aCreditCardNumber.
 	from := aFromDate.
-	to := aToDate.! !
+	to := aToDate.
+	
+	
+	(from start <= to end)
+		ifFalse: [ self error: self class cannotExistWithAnIncorrectMonthOfYearIntervalCreditCardErrorMessage ].
+	
+	! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'CreditCard class' category: #TusLibros!
 CreditCard class
 	instanceVariableNames: ''!
+
+!CreditCard class methodsFor: 'instance creation' stamp: 'GAC 6/11/2018 16:28:04'!
+cannotExistWithAnIncorrectMonthOfYearIntervalCreditCardErrorMessage
+
+	^'Cannot exist a credit card with incorrect month of year interval'.! !
 
 !CreditCard class methodsFor: 'instance creation' stamp: 'JEC 6/10/2018 19:41:26'!
 of: aPersonName with: aCreditCardNumber from: aFromDate to: aToDate
