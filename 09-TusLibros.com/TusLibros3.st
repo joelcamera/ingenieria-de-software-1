@@ -107,24 +107,22 @@ setUp
 
 !classDefinition: #CashierTest category: #TusLibros!
 TestCase subclass: #CashierTest
-	instanceVariableNames: 'aCart aSalesRegister aCashier aValidCreditCard aBookQuantity anObjectFactory aValidBook aMerchantProcessor'
+	instanceVariableNames: 'aCart aSalesRegister aCashier aBookQuantity anObjectFactory aValidBook aMerchantProcessor aCreditCard aTransactionId'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!CashierTest methodsFor: 'testing' stamp: 'JEC 6/11/2018 20:51:39'!
+!CashierTest methodsFor: 'testing' stamp: 'JEC 6/13/2018 20:07:24'!
 test01CannotCheckoutAnEmptyCart
 
-	aMerchantProcessor defineBehaviour: [ self ok ].
+	self 
+		assertThrowableWithMerchantProcessorBehaviour: [ aMerchantProcessor ok ] 
+		testSetup: [ ] 
+		testExcercise: [ aCashier checkout: aCart with: aCreditCard ] 
+		andTestAssert: [ :anErrorMessageText | 
+			self assert: Cashier cannotCheckoutAnEmptyCartErrorMessage equals: anErrorMessageText ]! !
 
-	self
-		should: [ aCashier checkout: aCart with: aValidCreditCard ]
-		raise: Error - MessageNotUnderstood 
-		withExceptionDo: [ :anError | 
-			self assert: Cashier cannotCheckoutAnEmptyCartErrorMessage equals: anError messageText.
-			self assert: aSalesRegister isEmpty.].! !
-
-!CashierTest methodsFor: 'testing' stamp: 'JEC 6/11/2018 20:51:35'!
+!CashierTest methodsFor: 'testing' stamp: 'JEC 6/13/2018 19:48:34'!
 test03CheckingOutANonEmptyCartAndAValidCreditCardReturnTheTransactionId
 
 	| expectedTransactionId |
@@ -135,9 +133,9 @@ test03CheckingOutANonEmptyCartAndAValidCreditCardReturnTheTransactionId
 	aCart add: aValidBook with: aBookQuantity.
 	expectedTransactionId _ 1.
 
-	self assert: (aCashier checkout: aCart with: aValidCreditCard) = expectedTransactionId.! !
+	self assert: (aCashier checkout: aCart with: aCreditCard) = expectedTransactionId.! !
 
-!CashierTest methodsFor: 'testing' stamp: 'JEC 6/11/2018 20:51:32'!
+!CashierTest methodsFor: 'testing' stamp: 'JEC 6/13/2018 19:48:42'!
 test04CheckingOutANonEmptyCartRegistersASaleInTheSalesRegister
 
 	| aSale expectedSalesRegister |
@@ -146,14 +144,14 @@ test04CheckingOutANonEmptyCartRegistersASaleInTheSalesRegister
 	
 	aCart add: aValidBook with: aBookQuantity.
 
-	aCashier checkout: aCart with: aValidCreditCard.
+	aCashier checkout: aCart with: aCreditCard.
 
 	aSale _ Sale with: aCart booksWithQuantity and: aCart totalPrice.
 	expectedSalesRegister _ OrderedCollection with: aSale.
 
 	self assert: aSalesRegister = expectedSalesRegister.! !
 
-!CashierTest methodsFor: 'testing' stamp: 'JEC 6/11/2018 20:51:29'!
+!CashierTest methodsFor: 'testing' stamp: 'JEC 6/13/2018 21:20:01'!
 test05CheckingOutSomeNonEmptyCartRegistersAllSalesInTheSalesRegister
 
 	| anotherCart aSale anotherSale anotherCashier expectedSalesRegister |
@@ -163,10 +161,14 @@ test05CheckingOutSomeNonEmptyCartRegistersAllSalesInTheSalesRegister
 	aCart add: aValidBook with: aBookQuantity.
 	anotherCart _ anObjectFactory cart.
 	anotherCart add: anObjectFactory anotherValidBook with: aBookQuantity.
-	anotherCashier _ Cashier withSalesRegister: aSalesRegister calendar: anObjectFactory calendarMock andMerchantProcessor:  aMerchantProcessor.
+	anotherCashier _ Cashier 
+							withSalesRegister: aSalesRegister 
+							calendar: anObjectFactory calendarMock 
+							merchantProcessor: aMerchantProcessor
+							andTransactionId: aTransactionId.
 
-	aCashier checkout: aCart with: aValidCreditCard.
-	anotherCashier checkout: anotherCart with: aValidCreditCard.
+	aCashier checkout: aCart with: aCreditCard.
+	anotherCashier checkout: anotherCart with: aCreditCard.
 
 	aSale _ Sale with: aCart booksWithQuantity and: aCart totalPrice.
 	anotherSale _ Sale with: anotherCart booksWithQuantity and: anotherCart totalPrice.
@@ -174,105 +176,109 @@ test05CheckingOutSomeNonEmptyCartRegistersAllSalesInTheSalesRegister
 
 	self assert: aSalesRegister = expectedSalesRegister.! !
 
-!CashierTest methodsFor: 'testing' stamp: 'JEC 6/11/2018 20:51:23'!
+!CashierTest methodsFor: 'testing' stamp: 'JEC 6/13/2018 21:03:01'!
 test06CheckingOutWithExpiredCreditCardMustRaiseException
 
-	| hasRequestToMerchantProcessor |
-	
-	hasRequestToMerchantProcessor := false.
-	aMerchantProcessor defineBehaviour: [ 
-		hasRequestToMerchantProcessor := true.
-		aMerchantProcessor expiredCreditCard ].
-
-	aCart add: aValidBook with: aBookQuantity.
-
-	self
-		should: [ aCashier checkout: aCart with: anObjectFactory expiredCreditCard ]
-		raise: Error - MessageNotUnderstood
-		withExceptionDo: [ :anError |
-			self assert: Cashier cannotCheckoutWithAnExpiredCreditCardErrorMessage equals: anError messageText.
-			self assert: aSalesRegister isEmpty.
-			self deny: hasRequestToMerchantProcessor ].
+	self 
+		assertThrowableWithoutRequestMerchantProcessorWithMerchantProcessorBehaviour: [ aMerchantProcessor expiredCreditCard ]
+		testSetup: [ aCart add: aValidBook with: aBookQuantity ]
+		testExcercise: [ aCashier checkout: aCart with: anObjectFactory expiredCreditCard ]
+		andTestAssert: [ :anErrorMessageText | 
+			self assert: Cashier cannotCheckoutWithAnExpiredCreditCardErrorMessage equals: anErrorMessageText.
+		]
 ! !
 
-!CashierTest methodsFor: 'testing' stamp: 'JEC 6/11/2018 20:51:19'!
+!CashierTest methodsFor: 'testing' stamp: 'JEC 6/13/2018 21:05:20'!
 test07CheckingOutWithIncorrectMonthOfYearIntervalCreditCardMustRaiseException
 
-	| hasRequestToMerchantProcessor |
-
-	hasRequestToMerchantProcessor := false.
-	aMerchantProcessor defineBehaviour: [ 
-		hasRequestToMerchantProcessor := true.
-		aMerchantProcessor expiredCreditCard ].
-
-	aCart add: aValidBook with: aBookQuantity.
-
 	self
-		should: [ aCashier checkout: aCart with: anObjectFactory incorrectMonthOfYearIntervalCreditCard ]
-		raise: Error - MessageNotUnderstood
-		withExceptionDo: [ :anError |
-			self assert: CreditCard cannotExistWithAnIncorrectMonthOfYearIntervalCreditCardErrorMessage equals: anError messageText.
-			self assert: aSalesRegister isEmpty.
-			self deny: hasRequestToMerchantProcessor. ].
-! !
+		assertThrowableWithoutRequestMerchantProcessorWithMerchantProcessorBehaviour: [ aMerchantProcessor invalidCreditCard ]
+		testSetup: [ aCart add: aValidBook with: aBookQuantity ]
+		testExcercise: [  aCashier checkout: aCart with: anObjectFactory incorrectMonthOfYearIntervalCreditCard ]
+		andTestAssert: [ :anErrorMessageText | 
+			self assert: CreditCard cannotExistWithAnIncorrectMonthOfYearIntervalCreditCardErrorMessage equals: anErrorMessageText.
+		]! !
 
-!CashierTest methodsFor: 'testing' stamp: 'JEC 6/11/2018 20:51:16'!
+!CashierTest methodsFor: 'testing' stamp: 'JEC 6/13/2018 20:11:34'!
 test08CheckingOutWithStolenCreditCardMustRaiseException
 
-	aMerchantProcessor defineBehaviour: [ aMerchantProcessor stolenCreditCard ].
+	self 
+		assertThrowableWithMerchantProcessorBehaviour: [ aMerchantProcessor stolenCreditCard ] 
+		testSetup: [ aCart add: aValidBook with: aBookQuantity ] 
+		testExcercise: [ aCashier checkout: aCart with: aCreditCard ] 
+		andTestAssert: [ :anErrorMessageText | 
+			self assert: MerchantProcessorSimulator stolenCreditCardErrorMessage equals: anErrorMessageText ]! !
 
-	aCart add: aValidBook with: aBookQuantity.
-
-	self
-		should: [ aCashier checkout: aCart with: anObjectFactory validCreditCard ]
-		raise: Error - MessageNotUnderstood
-		withExceptionDo: [ :anError |
-			self assert: MerchantProcessorSimulator stolenCreditCardErrorMessage equals: anError messageText.
-			self assert: aSalesRegister isEmpty ].
-! !
-
-!CashierTest methodsFor: 'testing' stamp: 'JEC 6/11/2018 20:51:12'!
+!CashierTest methodsFor: 'testing' stamp: 'JEC 6/13/2018 20:13:54'!
 test09CheckingOutWithInvalidCreditCardMustRaiseException
 
-	aMerchantProcessor defineBehaviour: [ aMerchantProcessor invalidCreditCard ].
+	self 
+		assertThrowableWithMerchantProcessorBehaviour: [ aMerchantProcessor invalidCreditCard ] 
+		testSetup: [ aCart add: aValidBook with: aBookQuantity ] 
+		testExcercise: [ aCashier checkout: aCart with: aCreditCard ] 
+		andTestAssert: [ :anErrorMessageText | 
+			self assert: MerchantProcessorSimulator invalidCreditCardErrorMessage equals: anErrorMessageText ]! !
 
-	aCart add: aValidBook with: aBookQuantity.
-
-	self
-		should: [ aCashier checkout: aCart with: anObjectFactory validCreditCard ]
-		raise: Error - MessageNotUnderstood
-		withExceptionDo: [ :anError |
-			self assert: MerchantProcessorSimulator invalidCreditCardErrorMessage equals: anError messageText.
-			self assert: aSalesRegister isEmpty ].
-! !
-
-!CashierTest methodsFor: 'testing' stamp: 'JEC 6/11/2018 20:51:04'!
+!CashierTest methodsFor: 'testing' stamp: 'JEC 6/13/2018 20:15:03'!
 test10CheckingOutWhenTheMerchantProcessorIsOutOfService
 
-	aMerchantProcessor defineBehaviour: [ aMerchantProcessor outOfService ].
-
-	aCart add: aValidBook with: aBookQuantity.
-
-	self
-		should: [ aCashier checkout: aCart with: anObjectFactory validCreditCard ]
-		raise: Error - MessageNotUnderstood
-		withExceptionDo: [ :anError |
-			self assert: MerchantProcessorSimulator outOfServiceErrorMessage equals: anError messageText.
-			self assert: aSalesRegister isEmpty ].
-! !
+	self 
+		assertThrowableWithMerchantProcessorBehaviour: [ aMerchantProcessor outOfService ] 
+		testSetup: [ aCart add: aValidBook with: aBookQuantity ] 
+		testExcercise: [ aCashier checkout: aCart with: aCreditCard ] 
+		andTestAssert: [ :anErrorMessageText | 
+			self assert: MerchantProcessorSimulator outOfServiceErrorMessage equals: anErrorMessageText ]! !
 
 
-!CashierTest methodsFor: 'setUp' stamp: 'JEC 6/11/2018 19:48:37'!
+!CashierTest methodsFor: 'setUp' stamp: 'JEC 6/13/2018 21:20:46'!
 setUp
 
 	anObjectFactory := ObjectFactory new.
 	aCart _ anObjectFactory cart.
 	aMerchantProcessor := MerchantProcessorSimulator new.
 	aSalesRegister _ OrderedCollection new.
-	aCashier _ Cashier withSalesRegister: aSalesRegister calendar: anObjectFactory calendarMock andMerchantProcessor: aMerchantProcessor.
-	aValidCreditCard _ anObjectFactory validCreditCard.
+	aTransactionId := 0.
+	aCashier _ Cashier 
+					withSalesRegister: aSalesRegister 
+					calendar: anObjectFactory calendarMock 
+					merchantProcessor: aMerchantProcessor 
+					andTransactionId: aTransactionId.
+	aCreditCard _ anObjectFactory validCreditCard.
 	aBookQuantity _ 2.
 	aValidBook := anObjectFactory validBook.! !
+
+
+!CashierTest methodsFor: 'assertion' stamp: 'JEC 6/13/2018 20:08:11'!
+assertThrowableWithMerchantProcessorBehaviour: aBehaviourClosure testSetup: aSetupClosure testExcercise: anExcerciseClosure andTestAssert: anAssertClosure
+
+	aMerchantProcessor defineBehaviour: aBehaviourClosure.
+	
+	aSetupClosure value.
+
+	self
+		should: anExcerciseClosure
+		raise: Error - MessageNotUnderstood 
+		withExceptionDo: [ :anError | 
+			self assert: aSalesRegister isEmpty.
+			anAssertClosure value: anError messageText.
+		].! !
+
+!CashierTest methodsFor: 'assertion' stamp: 'JEC 6/13/2018 21:00:21'!
+assertThrowableWithoutRequestMerchantProcessorWithMerchantProcessorBehaviour: aBehaviourClosure testSetup: aSetupClosure testExcercise: anExcerciseClosure andTestAssert: anAssertClosure
+
+	| hasRequestToMerchantProcessor |
+	
+	hasRequestToMerchantProcessor := false.
+
+	self 
+		assertThrowableWithMerchantProcessorBehaviour: [ aBehaviourClosure value.
+			hasRequestToMerchantProcessor := true. ] 
+		testSetup: aSetupClosure 
+		testExcercise: anExcerciseClosure 
+		andTestAssert: [ :anErrorMessageText | 
+			anAssertClosure value: anErrorMessageText .
+			self deny: hasRequestToMerchantProcessor
+		].! !
 
 
 !classDefinition: #CalendarMock category: #TusLibros!
@@ -440,7 +446,6 @@ nextTransactionId
 	^transactionId! !
 
 
-
 !Cashier methodsFor: 'check out' stamp: 'JEC 6/11/2018 19:59:41'!
 checkout: aCart with: aCreditCard 
 
@@ -457,9 +462,10 @@ checkout: aCart with: aCreditCard
 	^self nextTransactionId.! !
 
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'JEC 6/11/2018 19:57:17'!
-initializeWithSalesRegister: aSalesRegister calendar: aCalendarClock andMerchantProcessor: aMerchantProcessor
-	transactionId _ 0.
+!Cashier methodsFor: 'initialization' stamp: 'JEC 6/13/2018 21:17:27'!
+initializeWithSalesRegister: aSalesRegister calendar: aCalendarClock merchantProcessor: aMerchantProcessor andTransactionId: aTransactionId
+
+	transactionId _ aTransactionId.
 	salesRegister _ aSalesRegister.
 	clock _ aCalendarClock.
 	merchantProcessor _ aMerchantProcessor.! !
@@ -486,13 +492,14 @@ cannotCheckoutWithAnIncorrectMonthOfYearIntervalCreditCardErrorMessage
 	^'Cannot checkout with a credit card with incorrect month of year interval'.! !
 
 
+!Cashier class methodsFor: 'instance creation' stamp: 'JEC 6/13/2018 21:15:56'!
+withSalesRegister: aSalesRegister calendar: aClock merchantProcessor: aMerchantProcessor andTransactionId: aTransactionId
 
-!Cashier class methodsFor: 'as yet unclassified' stamp: 'JEC 6/11/2018 19:57:17'!
-withSalesRegister: aSalesRegister calendar: aClock andMerchantProcessor: aMerchantProcessor
 	^ self new
 		initializeWithSalesRegister: aSalesRegister
 		calendar: aClock
-		andMerchantProcessor: aMerchantProcessor.! !
+		merchantProcessor: aMerchantProcessor
+		andTransactionId: aTransactionId.! !
 
 
 !classDefinition: #CreditCard category: #TusLibros!
@@ -561,35 +568,41 @@ Object subclass: #MerchantProcessorSimulator
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!MerchantProcessorSimulator methodsFor: 'as yet unclassified' stamp: 'JEC 6/11/2018 20:01:37'!
-debit: aValue to: aCreditCard 
-	behaviour value.! !
-
-!MerchantProcessorSimulator methodsFor: 'as yet unclassified' stamp: 'JEC 6/11/2018 20:50:39'!
-defineBehaviour: aBlockClosure 
-	behaviour := aBlockClosure.! !
-
-!MerchantProcessorSimulator methodsFor: 'as yet unclassified' stamp: 'JEC 6/11/2018 20:11:12'!
+!MerchantProcessorSimulator methodsFor: 'behaviours' stamp: 'JEC 6/13/2018 21:08:13'!
 expiredCreditCard
+
 	self error: 'Merchant Processor expired credit card'.! !
 
-!MerchantProcessorSimulator methodsFor: 'as yet unclassified' stamp: 'JEC 6/11/2018 20:33:05'!
+!MerchantProcessorSimulator methodsFor: 'behaviours' stamp: 'JEC 6/11/2018 20:33:05'!
 invalidCreditCard
 
 	self error: self class invalidCreditCardErrorMessage.! !
 
-!MerchantProcessorSimulator methodsFor: 'as yet unclassified' stamp: 'JEC 6/11/2018 20:05:33'!
+!MerchantProcessorSimulator methodsFor: 'behaviours' stamp: 'JEC 6/11/2018 20:05:33'!
 ok
 ! !
 
-!MerchantProcessorSimulator methodsFor: 'as yet unclassified' stamp: 'JEC 6/11/2018 20:45:29'!
+!MerchantProcessorSimulator methodsFor: 'behaviours' stamp: 'JEC 6/13/2018 21:08:00'!
 outOfService
+
 	self error: self class outOfServiceErrorMessage.! !
 
-!MerchantProcessorSimulator methodsFor: 'as yet unclassified' stamp: 'JEC 6/11/2018 20:31:49'!
+!MerchantProcessorSimulator methodsFor: 'behaviours' stamp: 'JEC 6/11/2018 20:31:49'!
 stolenCreditCard
 
 	self error: self class stolenCreditCardErrorMessage.! !
+
+
+!MerchantProcessorSimulator methodsFor: 'debit' stamp: 'JEC 6/13/2018 21:08:26'!
+debit: aValue to: aCreditCard 
+
+	behaviour value.! !
+
+
+!MerchantProcessorSimulator methodsFor: 'defining behaviour' stamp: 'JEC 6/13/2018 21:08:20'!
+defineBehaviour: aBlockClosure
+
+	behaviour := aBlockClosure.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -597,16 +610,17 @@ stolenCreditCard
 MerchantProcessorSimulator class
 	instanceVariableNames: ''!
 
-!MerchantProcessorSimulator class methodsFor: 'as yet unclassified' stamp: 'JEC 6/11/2018 20:33:32'!
+!MerchantProcessorSimulator class methodsFor: 'error messages' stamp: 'JEC 6/11/2018 20:33:32'!
 invalidCreditCardErrorMessage
 
 	^'Merchant Processor - Invalid credit card'! !
 
-!MerchantProcessorSimulator class methodsFor: 'as yet unclassified' stamp: 'JEC 6/11/2018 20:46:03'!
+!MerchantProcessorSimulator class methodsFor: 'error messages' stamp: 'JEC 6/13/2018 21:09:59'!
 outOfServiceErrorMessage
+
 	^'Merchant Processor - Out of service'.! !
 
-!MerchantProcessorSimulator class methodsFor: 'as yet unclassified' stamp: 'JEC 6/11/2018 20:30:56'!
+!MerchantProcessorSimulator class methodsFor: 'error messages' stamp: 'JEC 6/11/2018 20:30:56'!
 stolenCreditCardErrorMessage
 
 	^'Merchant Processor - Stolen credit card'! !
