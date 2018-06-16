@@ -1,3 +1,65 @@
+!classDefinition: #AplicationInterfaceTest category: #TusLibros!
+TestCase subclass: #AplicationInterfaceTest
+	instanceVariableNames: 'anApplicationInterface aValidClientId aValidPassword'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/16/2018 15:25:21'!
+test01CreateACartWithValidUserAndPasswordReturnsACartId
+
+	| aCartId |
+
+	aCartId _ 1.
+
+	self assert: (anApplicationInterface createCartFor: aValidClientId withPassword: aValidPassword) = aCartId.! !
+
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/16/2018 15:27:17'!
+test02CreateACartForInvalidUserThrowsException
+
+	| anInvalidClientId |
+
+	anInvalidClientId _ -1.
+
+	self
+		should: [ anApplicationInterface createCartFor: anInvalidClientId withPassword: aValidPassword ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: ApplicationInterface invalidClientErrorMessage = anError messageText ].! !
+
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/16/2018 15:27:08'!
+test03CreateACartForUserWithInvalidPasswordThrowsException
+
+	| anInvalidPassword |
+
+	anInvalidPassword _ 'invalid password'.
+
+	self
+		should: [ anApplicationInterface createCartFor: aValidClientId withPassword: anInvalidPassword ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: ApplicationInterface invalidClientErrorMessage = anError messageText ].! !
+
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/16/2018 15:27:58'!
+test04CanCreateMoreThanOneCartForAValidUser
+
+	| firstCartId secondCartId |
+
+	firstCartId _ 1.
+	secondCartId _ 2.
+
+	self assert: (anApplicationInterface createCartFor: aValidClientId withPassword: aValidPassword) = firstCartId.
+	self assert: (anApplicationInterface createCartFor: aValidClientId withPassword: aValidPassword) = secondCartId.! !
+
+
+!AplicationInterfaceTest methodsFor: 'setUp' stamp: 'JEC 6/16/2018 15:29:06'!
+setUp
+
+	anApplicationInterface := ApplicationInterface new.
+	aValidClientId := 0.
+	aValidPassword := 'a password'.! !
+
+
 !classDefinition: #CartTest category: #TusLibros!
 TestCase subclass: #CartTest
 	instanceVariableNames: 'anObjectFactory aCart aValidBook aBookQuantity'
@@ -281,55 +343,43 @@ assertThrowableWithoutRequestMerchantProcessorWithMerchantProcessorBehaviour: aB
 		].! !
 
 
-!classDefinition: #XxxTest category: #TusLibros!
-TestCase subclass: #XxxTest
-	instanceVariableNames: ''
+!classDefinition: #ApplicationInterface category: #TusLibros!
+Object subclass: #ApplicationInterface
+	instanceVariableNames: 'cartIdNumber'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!XxxTest methodsFor: 'as yet unclassified' stamp: 'JEC 6/14/2018 20:14:38'!
-test01CanCreateACartWhenPassingAValidClientAndPassword
+!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/16/2018 15:19:32'!
+createCartFor: aClientId withPassword: aPassword 
 
-	| xxx aClientId aPassword aCartId |
+	(aClientId ~= 0 or: [ aPassword ~= 'a password' ])
+		ifTrue: [self error: self class invalidClientErrorMessage ].
 
-	xxx := Xxx new.
-	aClientId := 0.
-	aPassword := 'a password'.
+	^self nextCartId.! !
 
-	aCartId := 1.
+!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/16/2018 15:18:29'!
+initialize
 
-	self assert: (xxx createCartFor: aClientId withPassword: aPassword) = aCartId.	! !
+	cartIdNumber := 0.! !
 
-!XxxTest methodsFor: 'as yet unclassified' stamp: 'JEC 6/14/2018 20:16:27'!
-test02WhenPassingAnInvalidClientThrowsException
+!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/16/2018 15:21:13'!
+nextCartId
 
-	| xxx aClientId aPassword |
+	cartIdNumber := cartIdNumber + 1.
+	
+	^cartIdNumber.! !
 
-	xxx := Xxx new.
-	aClientId := 1.
-	aPassword := 'a password'.
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-	self
-		should: [ xxx createCartFor: aClientId withPassword: aPassword ] 
-		raise: Error - MessageNotUnderstood 
-		withExceptionDo: [ :anError |
-			self assert: Xxx invalidClientErrorMessage = anError messageText ].! !
+!classDefinition: 'ApplicationInterface class' category: #TusLibros!
+ApplicationInterface class
+	instanceVariableNames: ''!
 
-!XxxTest methodsFor: 'as yet unclassified' stamp: 'JEC 6/14/2018 20:16:48'!
-test03WhenPassingAnInvalidPasswordThrowsException
-
-	| xxx aClientId aPassword |
-
-	xxx := Xxx new.
-	aClientId := 0.
-	aPassword := 'invalid password'.
-
-	self
-		should: [ xxx createCartFor: aClientId withPassword: aPassword ] 
-		raise: Error - MessageNotUnderstood 
-		withExceptionDo: [ :anError |
-			self assert: Xxx invalidClientErrorMessage = anError messageText ].! !
+!ApplicationInterface class methodsFor: 'as yet unclassified' stamp: 'JEC 6/14/2018 20:07:04'!
+invalidClientErrorMessage
+	
+	^'Invalid client'.! !
 
 
 !classDefinition: #CalendarMock category: #TusLibros!
@@ -801,30 +851,3 @@ Sale class
 with: someBooksWithTheirQuantities and: aTotalPrice
 
 	^self new initializeWithBooks: someBooksWithTheirQuantities andPrice: aTotalPrice.! !
-
-
-!classDefinition: #Xxx category: #TusLibros!
-Object subclass: #Xxx
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'TusLibros'!
-
-!Xxx methodsFor: 'as yet unclassified' stamp: 'JEC 6/14/2018 20:09:27'!
-createCartFor: aClientId withPassword: aPassword 
-
-	(aClientId ~= 0 or: [ aPassword ~= 'a password' ])
-		ifTrue: [self error: self class invalidClientErrorMessage ].
-
-	^1.! !
-
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'Xxx class' category: #TusLibros!
-Xxx class
-	instanceVariableNames: ''!
-
-!Xxx class methodsFor: 'as yet unclassified' stamp: 'JEC 6/14/2018 20:07:04'!
-invalidClientErrorMessage
-	
-	^'Invalid client'.! !
