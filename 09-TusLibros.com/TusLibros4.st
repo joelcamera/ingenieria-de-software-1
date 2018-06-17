@@ -1,6 +1,6 @@
 !classDefinition: #AplicationInterfaceTest category: #TusLibros!
 TestCase subclass: #AplicationInterfaceTest
-	instanceVariableNames: 'anApplicationInterface aValidClientId aValidPassword'
+	instanceVariableNames: 'anApplicationInterface aValidClientId aValidPassword anotherValidClientId anotherValidPassword clients'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -51,13 +51,29 @@ test04CanCreateMoreThanOneCartForAValidUser
 	self assert: (anApplicationInterface createCartFor: aValidClientId withPassword: aValidPassword) = firstCartId.
 	self assert: (anApplicationInterface createCartFor: aValidClientId withPassword: aValidPassword) = secondCartId.! !
 
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/17/2018 00:42:29'!
+test05CanHaveCartsForMoreThanOneValidClient
 
-!AplicationInterfaceTest methodsFor: 'setUp' stamp: 'JEC 6/16/2018 15:29:06'!
+	| firstCartId secondCartId |
+
+	firstCartId _ 1.
+	secondCartId _ 2.
+
+	self assert: (anApplicationInterface createCartFor: aValidClientId withPassword: aValidPassword) = firstCartId.
+	self assert: (anApplicationInterface createCartFor: anotherValidClientId withPassword: anotherValidPassword ) = secondCartId.! !
+
+
+!AplicationInterfaceTest methodsFor: 'setUp' stamp: 'JEC 6/17/2018 00:27:20'!
 setUp
 
-	anApplicationInterface := ApplicationInterface new.
-	aValidClientId := 0.
-	aValidPassword := 'a password'.! !
+	aValidClientId := 1.
+	aValidPassword := 'a password'.
+	anotherValidClientId := 2.
+	anotherValidPassword := 'another valid password'.
+	clients := Dictionary new.
+	clients add: aValidClientId -> aValidPassword; add: anotherValidClientId -> anotherValidPassword.
+	anApplicationInterface := ApplicationInterface with: clients.
+	! !
 
 
 !classDefinition: #CartTest category: #TusLibros!
@@ -345,23 +361,29 @@ assertThrowableWithoutRequestMerchantProcessorWithMerchantProcessorBehaviour: aB
 
 !classDefinition: #ApplicationInterface category: #TusLibros!
 Object subclass: #ApplicationInterface
-	instanceVariableNames: 'cartIdNumber'
+	instanceVariableNames: 'cartIdNumber clients'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/16/2018 15:19:32'!
+!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 00:33:37'!
+assertValidClient: aClientId andValidPassword: aPassword.
+
+	((clients includesKey: aClientId) and: [ (clients at: aClientId) = aPassword ])
+		ifFalse:[ self error: self class invalidClientErrorMessage ].! !
+
+!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 00:33:17'!
 createCartFor: aClientId withPassword: aPassword 
 
-	(aClientId ~= 0 or: [ aPassword ~= 'a password' ])
-		ifTrue: [self error: self class invalidClientErrorMessage ].
+	self assertValidClient: aClientId andValidPassword: aPassword.
 
 	^self nextCartId.! !
 
-!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/16/2018 15:18:29'!
-initialize
+!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 00:19:03'!
+initializeWith: aClientsDictionary
 
-	cartIdNumber := 0.! !
+	cartIdNumber := 0.
+	clients := aClientsDictionary.! !
 
 !ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/16/2018 15:21:13'!
 nextCartId
@@ -380,6 +402,11 @@ ApplicationInterface class
 invalidClientErrorMessage
 	
 	^'Invalid client'.! !
+
+!ApplicationInterface class methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 00:18:33'!
+with: aClientsDictionary
+
+	^self new initializeWith: aClientsDictionary.! !
 
 
 !classDefinition: #CalendarMock category: #TusLibros!
