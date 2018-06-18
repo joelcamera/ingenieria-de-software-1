@@ -282,7 +282,7 @@ test18AddABookToCartThrowsExceptionWhenTheTimeHasExpired
 		withExceptionDo: [ :anError | 
 			self assert: ApplicationInterface expiredCartErrorMessage = anError messageText ].! !
 
-!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/18/2018 03:21:49'!
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/18/2018 03:36:59'!
 test19CheckOutNotEmptyCartWithValidCreditCardThrowsExceptionWhenTheTimeHasExpired
 
 	| aCartId aQuantity |
@@ -292,7 +292,7 @@ test19CheckOutNotEmptyCartWithValidCreditCardThrowsExceptionWhenTheTimeHasExpire
 	aCartId := anApplicationInterface createCartFor: aValidClientId withPassword: aValidPassword.
 	anApplicationInterface add: aValidBook to: aCartId quantity: aQuantity.
 
-	aCalendarMock addMinutes: 31.
+	aCalendarMock addMinutes: 61.
 
 	self
 		should: [ anApplicationInterface 
@@ -304,7 +304,7 @@ test19CheckOutNotEmptyCartWithValidCreditCardThrowsExceptionWhenTheTimeHasExpire
 		withExceptionDo: [ :anError | 
 			self assert: ApplicationInterface expiredCartErrorMessage = anError messageText ].! !
 
-!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/18/2018 03:25:16'!
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/18/2018 03:37:23'!
 test20ListCartWithExpiredCartThrowsException
 
 	| aQuantity aCartId |
@@ -314,7 +314,7 @@ test20ListCartWithExpiredCartThrowsException
 
 	anApplicationInterface add: aValidBook to: aCartId quantity: aQuantity.
 
-	aCalendarMock addMinutes: 31.
+	aCalendarMock addMinutes: 61.
 
 	self
 		should: [ anApplicationInterface listCart: aCartId ]
@@ -695,8 +695,17 @@ sessionFrom: aCartId
 
 	^ sessions detect: [ :aSession | aSession cartId = aCartId] ifNone: [ self error: self class invalidCartIdErrorMessage ]! !
 
+!ApplicationInterface methodsFor: 'private' stamp: 'JEC 6/18/2018 03:35:14'!
+updateExpirationTimeOf: aCartId
 
-!ApplicationInterface methodsFor: 'adding' stamp: 'JEC 6/18/2018 03:08:23'!
+	| aCartIdSession |
+
+	aCartIdSession := self sessionFrom: aCartId.
+
+	aCartIdSession updateExpirationTime.! !
+
+
+!ApplicationInterface methodsFor: 'adding' stamp: 'JEC 6/18/2018 03:35:27'!
 add: aBook to: aCartId quantity: aQuantity
 
 	| cart |
@@ -708,7 +717,9 @@ add: aBook to: aCartId quantity: aQuantity
 
 	cart := self returnCartFromSessions: aCartId.
 
-	cart add: aBook with: aQuantity.! !
+	cart add: aBook with: aQuantity.
+	
+	self updateExpirationTimeOf: aCartId.! !
 
 
 !ApplicationInterface methodsFor: 'checking out' stamp: 'JEC 6/18/2018 03:00:15'!
@@ -744,10 +755,11 @@ createCartFor: aClientId withPassword: aPassword
 	^ aCartId.! !
 
 
-!ApplicationInterface methodsFor: 'listing' stamp: 'JEC 6/18/2018 03:06:18'!
+!ApplicationInterface methodsFor: 'listing' stamp: 'JEC 6/18/2018 03:35:40'!
 listCart: aCartId
 
 	self assertNotExpiredCart: aCartId.
+	self updateExpirationTimeOf: aCartId.
 
 	^ (self returnCartFromSessions: aCartId ) booksWithQuantity copy! !
 
@@ -1379,6 +1391,17 @@ cartId
 isExpiredOnDate: aDateAndTime
 
 	^expirationDateAndTime < aDateAndTime.! !
+
+
+!Session methodsFor: 'private' stamp: 'JEC 6/18/2018 03:34:58'!
+updateExpirationTime
+
+	| aDate aTime |
+
+	aDate := expirationDateAndTime date.
+	aTime := expirationDateAndTime time.
+
+	expirationDateAndTime := (DateAndTime date: aDate time: aTime) + (Duration minutes: 30)! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
