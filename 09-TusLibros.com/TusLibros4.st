@@ -1,6 +1,6 @@
 !classDefinition: #AplicationInterfaceTest category: #TusLibros!
 TestCase subclass: #AplicationInterfaceTest
-	instanceVariableNames: 'anApplicationInterface aValidClientId aValidPassword anotherValidClientId anotherValidPassword clients'
+	instanceVariableNames: 'anApplicationInterface aValidClientId aValidPassword anotherValidClientId anotherValidPassword clients anObjectFactory aSalesRegister'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -14,8 +14,8 @@ test01CreateACartWithValidUserAndPasswordReturnsACartId
 
 	self assert: (anApplicationInterface createCartFor: aValidClientId withPassword: aValidPassword) = aCartId.! !
 
-!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/16/2018 15:27:17'!
-test02CreateACartForInvalidUserThrowsException
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/18/2018 00:32:26'!
+test02CreateACartForInvalidClientIdThrowsException
 
 	| anInvalidClientId |
 
@@ -62,18 +62,260 @@ test05CanHaveCartsForMoreThanOneValidClient
 	self assert: (anApplicationInterface createCartFor: aValidClientId withPassword: aValidPassword) = firstCartId.
 	self assert: (anApplicationInterface createCartFor: anotherValidClientId withPassword: anotherValidPassword ) = secondCartId.! !
 
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/17/2018 19:34:37'!
+test06AddABookToCartThrowsExceptionWhenTheCartIdIsInvalid
 
-!AplicationInterfaceTest methodsFor: 'setUp' stamp: 'JEC 6/17/2018 00:27:20'!
+	| aValidBook aValidQuantity anInvalidCartId |
+
+	aValidBook := anObjectFactory validBook.
+	aValidQuantity := 1.
+	anInvalidCartId := 0.
+
+	self
+		should: [ anApplicationInterface add: aValidBook to: anInvalidCartId quantity: aValidQuantity ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError | 
+			self assert: ApplicationInterface invalidCartIdErrorMessage = anError messageText ].! !
+
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/17/2018 19:35:14'!
+test07AddABookToCartThrowsExceptionWhenTheBookIsNotInTheCatalogue
+
+	| anInvalidBook aValidQuantity aCartId |
+
+	anInvalidBook := anObjectFactory invalidBook.
+	aValidQuantity := 1.
+	aCartId := anApplicationInterface createCartFor: aValidClientId withPassword: aValidPassword.
+
+	self
+		should: [ anApplicationInterface add: anInvalidBook to: aCartId quantity: aValidQuantity ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError | 
+			self assert: ApplicationInterface invalidBookErrorMessage = anError messageText ].! !
+
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/17/2018 19:34:00'!
+test08AddABookToCartThrowsExceptionWhenTheQuantityOfBookIsLessThanOne
+
+	| aValidBook anInvalidQuantity aCartId |
+
+	aValidBook := anObjectFactory validBook.
+	anInvalidQuantity := 0.
+	aCartId := anApplicationInterface createCartFor: aValidClientId withPassword: aValidPassword.
+
+	self
+		should: [ anApplicationInterface add: aValidBook to: aCartId quantity: anInvalidQuantity ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError | 
+			self assert: ApplicationInterface invalidBookQuantityErrorMessage = anError messageText ].! !
+
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/17/2018 21:23:03'!
+test09CanAddABookToClientsCart
+
+	| aBook aQuantity aCartId aListCart |
+
+	aBook := anObjectFactory validBook.
+	aQuantity := 1.
+	aCartId := anApplicationInterface createCartFor: aValidClientId withPassword: aValidPassword.
+
+	anApplicationInterface add: aBook to: aCartId quantity: aQuantity.
+
+	aListCart := anApplicationInterface listCart: aCartId.
+	self assert: (aListCart includesKey: aBook).
+	self assert: (aListCart at: aBook) = aQuantity.! !
+
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/17/2018 21:27:36'!
+test10GetCartWithInvalidCartIdThrowsException
+
+	| anInvalidCartId |
+
+	anInvalidCartId := 0.
+
+	self 
+		should: [ anApplicationInterface listCart: anInvalidCartId]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError | 
+			self assert: ApplicationInterface invalidCartIdErrorMessage = anError messageText ].! !
+
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/17/2018 21:36:02'!
+test11CheckOutCartWithInvalidCartIdThrowsException
+
+	| anInvalidCartId aCreditCardNumber anExpirationDate aClientName |
+
+	anInvalidCartId := 0.
+	aCreditCardNumber := '0000 0000 0000 0000'.
+	anExpirationDate := Month month: 01 year: 2020.
+	aClientName := 'a client name'.
+
+	self 
+		should: [ anApplicationInterface 
+						checkOutCart: anInvalidCartId 
+						withCreditCardNumber: aCreditCardNumber 
+						expirationDate: anExpirationDate 
+						andName: aClientName ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError | 
+			self assert: ApplicationInterface invalidCartIdErrorMessage = anError messageText ].! !
+
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/17/2018 23:40:10'!
+test12CheckOutCartWithExpiredCreditCardThrowsException
+
+	| aCartId aCreditCardNumber anExpiredExpirationDate aClientName |
+
+	aCartId := anApplicationInterface createCartFor: aValidClientId withPassword: aValidPassword.
+	aCreditCardNumber := '0000 0000 0000 0000'.
+	anExpiredExpirationDate := Month month: 01 year: 2015.
+	aClientName := 'a client name'.
+
+	self 
+		should: [ anApplicationInterface 
+						checkOutCart: aCartId 
+						withCreditCardNumber: aCreditCardNumber 
+						expirationDate: anExpiredExpirationDate 
+						andName: aClientName ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError | 
+			self assert: ApplicationInterface expiredCreditCardErrorMessage = anError messageText ].! !
+
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/18/2018 00:30:03'!
+test13CheckOutEmptyCartThrowsException
+
+	| aCartId aCreditCardNumber anExpirationDate aClientName |
+
+	aCartId := anApplicationInterface createCartFor: aValidClientId withPassword: aValidPassword.
+	aCreditCardNumber := '0000 0000 0000 0000'.
+	anExpirationDate := Month month: 01 year: 2019.
+	aClientName := 'a client name'.
+
+	self 
+		should: [ anApplicationInterface 
+						checkOutCart: aCartId 
+						withCreditCardNumber: aCreditCardNumber 
+						expirationDate: anExpirationDate 
+						andName: aClientName ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError | 
+			self assert: ApplicationInterface checkingOutEmptyCartErrorMessage = anError messageText ].! !
+
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/18/2018 00:57:51'!
+test14CanCheckOutNotEmptyCartWithValidCreditCard
+
+	| aCartId aQuantity aValidBook aCreditCardNumber anExpirationDate aClientName expectedSale aTransactionId expectedTransactionId expectedBooksWithQuantity expectedTotalAmount |
+
+	aValidBook := anObjectFactory validBook.
+	aQuantity := 1.
+
+	aCartId := anApplicationInterface createCartFor: aValidClientId withPassword: aValidPassword.
+	anApplicationInterface add: aValidBook to: aCartId quantity: aQuantity.
+
+	aCreditCardNumber := '0000 0000 0000 0000'.
+	anExpirationDate := Month month: 01 year: 2019.
+	aClientName := 'a client name'.
+
+	aTransactionId := anApplicationInterface 
+							checkOutCart: aCartId 
+							withCreditCardNumber: aCreditCardNumber 
+							expirationDate: anExpirationDate 
+							andName: aClientName.
+
+	expectedTransactionId := 1.
+	expectedBooksWithQuantity := Dictionary new.
+	expectedBooksWithQuantity add: (aValidBook -> aQuantity).
+	expectedTotalAmount := anObjectFactory catalogue at: aValidBook.
+	expectedSale := Sale for: aClientName with: expectedBooksWithQuantity and: expectedTotalAmount.
+	self assert: (aSalesRegister includes: expectedSale).
+	self assert: aTransactionId = expectedTransactionId.! !
+
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/18/2018 00:33:38'!
+test15ListPurchasesWithInvalidClientIdThrowsException
+
+	| anInvalidClientId |
+
+	anInvalidClientId := -1.
+	
+	self
+		should: [ anApplicationInterface listPurchasesFor: anInvalidClientId withPassword: aValidPassword ]
+		raise: Error - MessageNotUnderstood
+		withExceptionDo: [ :anError |
+			self assert: ApplicationInterface invalidClientErrorMessage = anError messageText ].! !
+
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/18/2018 01:24:13'!
+test16CanGetListPurchasesOfAValidClientWithOneBook
+
+	| aCartId aQuantity aValidBook aCreditCardNumber anExpirationDate aClientName expectedSale expectedBooksWithQuantity expectedTotalAmount |
+
+	aValidBook := anObjectFactory validBook.
+	aQuantity := 1.
+
+	aCartId := anApplicationInterface createCartFor: aValidClientId withPassword: aValidPassword.
+	anApplicationInterface add: aValidBook to: aCartId quantity: aQuantity.
+
+	aCreditCardNumber := '0000 0000 0000 0000'.
+	anExpirationDate := Month month: 01 year: 2019.
+	aClientName := 'a client name'.
+
+	anApplicationInterface 
+		checkOutCart: aCartId 
+		withCreditCardNumber: aCreditCardNumber 
+		expirationDate: anExpirationDate 
+		andName: aClientName.
+
+	expectedBooksWithQuantity := Dictionary new.
+	expectedBooksWithQuantity add: (aValidBook -> aQuantity).
+	expectedTotalAmount := anObjectFactory catalogue at: aValidBook.
+	expectedSale := Sale for: aClientName with: expectedBooksWithQuantity and: expectedTotalAmount.
+	self assert: (anApplicationInterface listPurchasesFor: aValidClientId withPassword: aValidPassword) =  expectedSale.! !
+
+!AplicationInterfaceTest methodsFor: 'tests' stamp: 'JEC 6/18/2018 01:29:57'!
+test17CanGetListPurchasesOfAValidClientWithMultipleBooks
+
+	| aCartId aQuantity aValidBook anotherValidBook aCreditCardNumber anExpirationDate aClientName expectedSale expectedBooksWithQuantity expectedTotalAmount |
+
+	aValidBook := anObjectFactory validBook.
+	anotherValidBook := anObjectFactory anotherValidBook.
+	aQuantity := 5.
+
+	aCartId := anApplicationInterface createCartFor: aValidClientId withPassword: aValidPassword.
+	anApplicationInterface add: aValidBook to: aCartId quantity: aQuantity.
+	anApplicationInterface add: anotherValidBook to: aCartId quantity: aQuantity.
+
+	aCreditCardNumber := '0000 0000 0000 0000'.
+	anExpirationDate := Month month: 01 year: 2019.
+	aClientName := 'a client name'.
+
+	anApplicationInterface 
+		checkOutCart: aCartId 
+		withCreditCardNumber: aCreditCardNumber 
+		expirationDate: anExpirationDate 
+		andName: aClientName.
+
+	expectedBooksWithQuantity := Dictionary new.
+	expectedBooksWithQuantity add: (aValidBook -> aQuantity); add: (anotherValidBook -> aQuantity).
+	expectedTotalAmount := ((anObjectFactory catalogue at: aValidBook) * aQuantity) + ((anObjectFactory catalogue at: anotherValidBook) * aQuantity).
+	expectedSale := Sale for: aClientName with: expectedBooksWithQuantity and: expectedTotalAmount.
+	self assert: (anApplicationInterface listPurchasesFor: aValidClientId withPassword: aValidPassword) =  expectedSale.! !
+
+
+!AplicationInterfaceTest methodsFor: 'setUp' stamp: 'JEC 6/18/2018 01:21:52'!
 setUp
 
-	aValidClientId := 1.
+	anObjectFactory := ObjectFactory new.
+	aValidClientId := 'a client name'.
 	aValidPassword := 'a password'.
-	anotherValidClientId := 2.
+	anotherValidClientId := 'another valid client'.
 	anotherValidPassword := 'another valid password'.
 	clients := Dictionary new.
 	clients add: aValidClientId -> aValidPassword; add: anotherValidClientId -> anotherValidPassword.
-	anApplicationInterface := ApplicationInterface with: clients.
-	! !
+	aSalesRegister _ OrderedCollection new.
+	anApplicationInterface := ApplicationInterface clients: clients 
+									catalogue: anObjectFactory catalogue 
+									clock: anObjectFactory calendarMock
+									salesRegister: aSalesRegister
+									merchantProcessor: MerchantProcessorSimulator new.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'AplicationInterfaceTest class' category: #TusLibros!
+AplicationInterfaceTest class
+	instanceVariableNames: 'aCalendarMock'!
 
 
 !classDefinition: #CartTest category: #TusLibros!
@@ -213,7 +455,7 @@ test03CheckingOutANonEmptyCartAndAValidCreditCardReturnTheTransactionId
 
 	self assert: (aCashier checkout: aCart with: aCreditCard) = expectedTransactionId.! !
 
-!CashierTest methodsFor: 'testing' stamp: 'JEC 6/13/2018 19:48:42'!
+!CashierTest methodsFor: 'testing' stamp: 'JEC 6/18/2018 00:56:14'!
 test04CheckingOutANonEmptyCartRegistersASaleInTheSalesRegister
 
 	| aSale expectedSalesRegister |
@@ -224,12 +466,12 @@ test04CheckingOutANonEmptyCartRegistersASaleInTheSalesRegister
 
 	aCashier checkout: aCart with: aCreditCard.
 
-	aSale _ Sale with: aCart booksWithQuantity and: aCart totalPrice.
+	aSale _ Sale for: aCreditCard name with: aCart booksWithQuantity and: aCart totalPrice.
 	expectedSalesRegister _ OrderedCollection with: aSale.
 
 	self assert: aSalesRegister = expectedSalesRegister.! !
 
-!CashierTest methodsFor: 'testing' stamp: 'JEC 6/13/2018 21:20:01'!
+!CashierTest methodsFor: 'testing' stamp: 'JEC 6/18/2018 00:56:59'!
 test05CheckingOutSomeNonEmptyCartRegistersAllSalesInTheSalesRegister
 
 	| anotherCart aSale anotherSale anotherCashier expectedSalesRegister |
@@ -248,8 +490,8 @@ test05CheckingOutSomeNonEmptyCartRegistersAllSalesInTheSalesRegister
 	aCashier checkout: aCart with: aCreditCard.
 	anotherCashier checkout: anotherCart with: aCreditCard.
 
-	aSale _ Sale with: aCart booksWithQuantity and: aCart totalPrice.
-	anotherSale _ Sale with: anotherCart booksWithQuantity and: anotherCart totalPrice.
+	aSale _ Sale for: aCreditCard name with: aCart booksWithQuantity and: aCart totalPrice.
+	anotherSale _ Sale for: aCreditCard name with: anotherCart booksWithQuantity and: anotherCart totalPrice.
 	expectedSalesRegister _ OrderedCollection with: aSale with: anotherSale.
 
 	self assert: aSalesRegister = expectedSalesRegister.! !
@@ -265,17 +507,6 @@ test06CheckingOutWithExpiredCreditCardMustRaiseException
 			self assert: Cashier cannotCheckoutWithAnExpiredCreditCardErrorMessage equals: anErrorMessageText.
 		]
 ! !
-
-!CashierTest methodsFor: 'testing' stamp: 'JEC 6/13/2018 21:05:20'!
-test07CheckingOutWithIncorrectMonthOfYearIntervalCreditCardMustRaiseException
-
-	self
-		assertThrowableWithoutRequestMerchantProcessorWithMerchantProcessorBehaviour: [ aMerchantProcessor invalidCreditCard ]
-		testSetup: [ aCart add: aValidBook with: aBookQuantity ]
-		testExcercise: [  aCashier checkout: aCart with: anObjectFactory incorrectMonthOfYearIntervalCreditCard ]
-		andTestAssert: [ :anErrorMessageText | 
-			self assert: CreditCard cannotExistWithAnIncorrectMonthOfYearIntervalCreditCardErrorMessage equals: anErrorMessageText.
-		]! !
 
 !CashierTest methodsFor: 'testing' stamp: 'JEC 6/13/2018 20:11:34'!
 test08CheckingOutWithStolenCreditCardMustRaiseException
@@ -308,12 +539,12 @@ test10CheckingOutWhenTheMerchantProcessorIsOutOfService
 			self assert: MerchantProcessorSimulator outOfServiceErrorMessage equals: anErrorMessageText ]! !
 
 
-!CashierTest methodsFor: 'setUp' stamp: 'JEC 6/13/2018 21:20:46'!
+!CashierTest methodsFor: 'setUp' stamp: 'JEC 6/18/2018 00:28:34'!
 setUp
 
 	anObjectFactory := ObjectFactory new.
 	aCart _ anObjectFactory cart.
-	aMerchantProcessor := MerchantProcessorSimulator new.
+	aMerchantProcessor := anObjectFactory merchantProcessorSimulator.
 	aSalesRegister _ OrderedCollection new.
 	aTransactionId := 0.
 	aCashier _ Cashier 
@@ -361,10 +592,43 @@ assertThrowableWithoutRequestMerchantProcessorWithMerchantProcessorBehaviour: aB
 
 !classDefinition: #ApplicationInterface category: #TusLibros!
 Object subclass: #ApplicationInterface
-	instanceVariableNames: 'cartIdNumber clients'
+	instanceVariableNames: 'clients catalogue cartId carts clock salesRegister transactionId merchantProcessor'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
+
+!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 21:04:42'!
+add: aBook to: aCartId quantity: aQuantity
+
+	self assertValidCartId: aCartId.
+	self assertBookInCatalogue: aBook.
+	self assertValidBookQuantity: aQuantity.
+
+	(carts at: aCartId) add: aBook with: aQuantity.! !
+
+!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 21:04:06'!
+assertBookInCatalogue: aBook
+
+	(catalogue includesKey: aBook)
+		ifFalse: [ self error: self class invalidBookErrorMessage ].! !
+
+!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 22:13:25'!
+assertCreditCardIsNotExpired: aCreditCard
+
+	(aCreditCard isExpiredOnDate: clock now)
+		ifTrue: [ self error: self class expiredCreditCardErrorMessage ]! !
+
+!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 21:04:53'!
+assertValidBookQuantity: aQuantity
+
+	aQuantity <= 0
+		ifTrue: [ self error: self class invalidBookQuantityErrorMessage ].! !
+
+!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 21:03:12'!
+assertValidCartId: aCartId
+
+	(carts includesKey: aCartId)
+		ifFalse: [ self error: self class invalidCartIdErrorMessage ].! !
 
 !ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 00:33:37'!
 assertValidClient: aClientId andValidPassword: aPassword.
@@ -372,25 +636,78 @@ assertValidClient: aClientId andValidPassword: aPassword.
 	((clients includesKey: aClientId) and: [ (clients at: aClientId) = aPassword ])
 		ifFalse:[ self error: self class invalidClientErrorMessage ].! !
 
-!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 00:33:17'!
+!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/18/2018 00:25:12'!
+checkOutCart: aCartId withCreditCardNumber: aCreditCardNumber expirationDate: anExpirationDate andName: aClientName
+
+	| aCreditCard aCart aCashier |
+
+	aCreditCard := CreditCard of: aClientName with: aCreditCardNumber expirationDate: anExpirationDate.
+	self assertCreditCardIsNotExpired: aCreditCard.
+
+	self assertValidCartId: aCartId.
+	aCart := carts at: aCartId.
+
+	aCart isEmpty
+		ifTrue: [ self error: self class checkingOutEmptyCartErrorMessage ].
+
+	aCashier := Cashier withSalesRegister: salesRegister calendar: clock merchantProcessor: merchantProcessor andTransactionId: transactionId.
+	^aCashier checkout: aCart with: aCreditCard.! !
+
+!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 20:15:32'!
 createCartFor: aClientId withPassword: aPassword 
+
+	| cartId |
 
 	self assertValidClient: aClientId andValidPassword: aPassword.
 
-	^self nextCartId.! !
+	cartId := self nextCartId.
+	carts add: cartId -> (Cart with: catalogue).
+	
+	^ cartId.! !
 
-!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 00:19:03'!
-initializeWith: aClientsDictionary
+!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/18/2018 00:22:13'!
+initializeWithClients: aClientsDictionary catalogue: aCatalogue clock: aCalendarClock salesRegister: aSalesRegister merchantProcessor: aMerchantProcessor.
 
-	cartIdNumber := 0.
-	clients := aClientsDictionary.! !
+	cartId := 0.
+	transactionId := 0.
+	clients := aClientsDictionary.
+	catalogue := aCatalogue.
+	clock := aCalendarClock.
+	salesRegister := aSalesRegister.
+	merchantProcessor := aMerchantProcessor.
 
-!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/16/2018 15:21:13'!
+	carts := Dictionary new.! !
+
+!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 21:29:15'!
+listCart: aCartId
+
+	^ (carts at: aCartId ifAbsent: [ self error: self class invalidCartIdErrorMessage ]) booksWithQuantity copy! !
+
+!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/18/2018 01:14:14'!
+listPurchasesFor: aClientId withPassword: aPassword
+
+	| salesFromClient aBookWithQuantities aTotalAmount quantity |
+
+	self assertValidClient: aClientId andValidPassword: aPassword.
+
+	salesFromClient := salesRegister select: [ :aSale | aSale client = aClientId ].
+
+	aTotalAmount := salesFromClient inject: 0 into: [ :sum :aSale | sum + aSale totalPrice ].
+	aBookWithQuantities := Dictionary new.
+	catalogue keys do: [ :aBook  |
+		quantity := salesFromClient inject: 0 into: [ :sum :aSale | sum + (aSale booksWithQuantities at: aBook ifAbsent: [0] ) ].
+		quantity = 0
+			ifFalse: [ aBookWithQuantities add: aBook -> quantity ].
+	].
+
+	^Sale for: aClientId with: aBookWithQuantities and: aTotalAmount.! !
+
+!ApplicationInterface methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 20:11:23'!
 nextCartId
 
-	cartIdNumber := cartIdNumber + 1.
+	cartId := cartId + 1.
 	
-	^cartIdNumber.! !
+	^cartId.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -398,15 +715,44 @@ nextCartId
 ApplicationInterface class
 	instanceVariableNames: ''!
 
+!ApplicationInterface class methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 23:47:20'!
+checkingOutEmptyCartErrorMessage
+
+	^'Cannot check out empty cart'.! !
+
+!ApplicationInterface class methodsFor: 'as yet unclassified' stamp: 'JEC 6/18/2018 00:21:10'!
+clients: aClientsDictionary catalogue: aCatalogue clock: aCalendarClock salesRegister: aSalesRegister merchantProcessor: aMerchantProcessor
+
+	^self new initializeWithClients: aClientsDictionary 
+				catalogue: aCatalogue 
+				clock: aCalendarClock 
+				salesRegister: aSalesRegister 
+				merchantProcessor: aMerchantProcessor.! !
+
+!ApplicationInterface class methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 22:13:57'!
+expiredCreditCardErrorMessage
+	
+	^'Expired credit card'.! !
+
+!ApplicationInterface class methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 19:20:17'!
+invalidBookErrorMessage
+
+	^'Invalid book'! !
+
+!ApplicationInterface class methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 19:32:42'!
+invalidBookQuantityErrorMessage
+
+	^'Invalid Book Quantity. Must be more or equal than one.'! !
+
+!ApplicationInterface class methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 19:04:12'!
+invalidCartIdErrorMessage
+	
+	^'Invalid cart id'.! !
+
 !ApplicationInterface class methodsFor: 'as yet unclassified' stamp: 'JEC 6/14/2018 20:07:04'!
 invalidClientErrorMessage
 	
 	^'Invalid client'.! !
-
-!ApplicationInterface class methodsFor: 'as yet unclassified' stamp: 'JEC 6/17/2018 00:18:33'!
-with: aClientsDictionary
-
-	^self new initializeWith: aClientsDictionary.! !
 
 
 !classDefinition: #CalendarMock category: #TusLibros!
@@ -560,10 +906,10 @@ assertThatTheCartIsNotEmpty: aCart
 		ifTrue: [self error: self class cannotCheckoutAnEmptyCartErrorMessage ].
 ! !
 
-!Cashier methodsFor: 'private' stamp: 'GAC 6/11/2018 16:00:46'!
+!Cashier methodsFor: 'private' stamp: 'JEC 6/17/2018 22:52:52'!
 assertThatTheCreditCardIsNotExpired: aCreditCard 
 	
-	(aCreditCard isExpiredOnDate: clock)
+	(aCreditCard isExpiredOnDate: clock now)
 		ifTrue: [ self error: self class cannotCheckoutWithAnExpiredCreditCardErrorMessage ].! !
 
 !Cashier methodsFor: 'private' stamp: 'JEC 6/10/2018 17:23:49'!
@@ -574,7 +920,7 @@ nextTransactionId
 	^transactionId! !
 
 
-!Cashier methodsFor: 'check out' stamp: 'JEC 6/11/2018 19:59:41'!
+!Cashier methodsFor: 'check out' stamp: 'JEC 6/18/2018 00:54:40'!
 checkout: aCart with: aCreditCard 
 
 	| aSale |
@@ -584,7 +930,7 @@ checkout: aCart with: aCreditCard
 
 	merchantProcessor debit: aCart totalPrice to: aCreditCard.
 
-	aSale := Sale with: aCart booksWithQuantity and: aCart totalPrice.
+	aSale := Sale for: aCreditCard name with: aCart booksWithQuantity and: aCart totalPrice.
 	salesRegister add: aSale.
 
 	^self nextTransactionId.! !
@@ -632,45 +978,31 @@ withSalesRegister: aSalesRegister calendar: aClock merchantProcessor: aMerchantP
 
 !classDefinition: #CreditCard category: #TusLibros!
 Object subclass: #CreditCard
-	instanceVariableNames: 'person creditCardNumber from to'
+	instanceVariableNames: 'personName creditCardNumber expirationDate'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!CreditCard methodsFor: 'accessing' stamp: 'JEC 6/10/2018 22:49:57'!
-fromMonthOfYear
+!CreditCard methodsFor: 'testing' stamp: 'JEC 6/17/2018 23:35:42'!
+isExpiredOnDate: aDateAndTime
 
-	^from copy.! !
-
-!CreditCard methodsFor: 'accessing' stamp: 'GAC 6/11/2018 16:00:18'!
-isExpiredOnDate: aDate 
-
-	| aTimeSpan |
-
-	aTimeSpan := self fromMonthOfYear start to: self toMonthOfYear end.
-	
-	^ (aTimeSpan includes: aDate now) not
-! !
-
-!CreditCard methodsFor: 'accessing' stamp: 'JEC 6/10/2018 22:50:21'!
-toMonthOfYear
-
-	^ to copy.! !
+	^ (aDateAndTime yearNumber < expirationDate yearNumber or:
+		[ aDateAndTime yearNumber < expirationDate yearNumber and: 
+			[ aDateAndTime monthIndex <= expirationDate monthIndex ] ] ) not.! !
 
 
-!CreditCard methodsFor: 'initialization' stamp: 'GAC 6/11/2018 16:29:53'!
-initializeWithName: aPersonName creditCardNumber: aCreditCardNumber from: aFromDate to: aToDate
+!CreditCard methodsFor: 'initialization' stamp: 'JEC 6/18/2018 00:55:18'!
+initializeWithName: aPersonName creditCardNumber: aCreditCardNumber expirationDate: anExpirationDate
 
-	person := aPersonName.
+	personName := aPersonName.
 	creditCardNumber := aCreditCardNumber.
-	from := aFromDate.
-	to := aToDate.
-	
-	
-	(from start <= to end)
-		ifFalse: [ self error: self class cannotExistWithAnIncorrectMonthOfYearIntervalCreditCardErrorMessage ].
-	
-	! !
+	expirationDate := anExpirationDate.! !
+
+
+!CreditCard methodsFor: 'accessing' stamp: 'JEC 6/18/2018 00:55:26'!
+name
+
+	^personName copy.! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -683,10 +1015,10 @@ cannotExistWithAnIncorrectMonthOfYearIntervalCreditCardErrorMessage
 
 	^'Cannot exist a credit card with incorrect month of year interval'.! !
 
-!CreditCard class methodsFor: 'instance creation' stamp: 'JEC 6/10/2018 19:41:26'!
-of: aPersonName with: aCreditCardNumber from: aFromDate to: aToDate
+!CreditCard class methodsFor: 'instance creation' stamp: 'JEC 6/17/2018 22:42:13'!
+of: aPersonName with: aCreditCardNumber expirationDate: anExpirationDate
 
-	^self new initializeWithName: aPersonName creditCardNumber: aCreditCardNumber from: aFromDate to: aToDate.! !
+	^self new initializeWithName: aPersonName creditCardNumber: aCreditCardNumber expirationDate: anExpirationDate .! !
 
 
 !classDefinition: #MerchantProcessorSimulator category: #TusLibros!
@@ -732,6 +1064,12 @@ defineBehaviour: aBlockClosure
 
 	behaviour := aBlockClosure.! !
 
+
+!MerchantProcessorSimulator methodsFor: 'as yet unclassified' stamp: 'JEC 6/18/2018 00:29:37'!
+initialize
+
+	behaviour := [ self ok ].! !
+
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
 !classDefinition: 'MerchantProcessorSimulator class' category: #TusLibros!
@@ -766,10 +1104,15 @@ anotherValidBook
 
 	^'another valid book'.! !
 
-!ObjectFactory methodsFor: 'object creation' stamp: 'JEC 6/11/2018 18:50:26'!
+!ObjectFactory methodsFor: 'object creation' stamp: 'JEC 6/17/2018 22:50:23'!
 calendarMock
 
-	^CalendarMock with: (Date year: 2018 month: 06 day: 10).! !
+	| aDate aTime |
+
+	aDate := Date year: 2018 month: 06 day: 17.
+	aTime := Time hour: 0 minute: 0 second: 0.
+
+	^CalendarMock with: (DateAndTime date: aDate time: aTime).! !
 
 !ObjectFactory methodsFor: 'object creation' stamp: 'JEC 6/11/2018 18:50:34'!
 cart
@@ -789,58 +1132,51 @@ catalogue
 
 	^aCatalogue.! !
 
-!ObjectFactory methodsFor: 'object creation' stamp: 'JEC 6/11/2018 18:50:54'!
+!ObjectFactory methodsFor: 'object creation' stamp: 'JEC 6/18/2018 01:22:33'!
 expiredCreditCard
 
-	| aPersonName aCreditCardNumber aFromMonthOfYear aToMonthOfYear |
+	"Expired in respect to the Calendar Mock"
 
-	aPersonName _ 'a person name'.
+	| aPersonName aCreditCardNumber anExpiredExpirationDate |
+
+	aPersonName _ 'a client name'.
 	aCreditCardNumber _ '0000000000000000'.
-	aFromMonthOfYear _ Month month: 01 year: 2010.
-	aToMonthOfYear _ Month month: 01 year: 2015.
+	anExpiredExpirationDate _ Month month: 01 year: 2015.
 
-	^ CreditCard of: aPersonName with: aCreditCardNumber from: aFromMonthOfYear to: aToMonthOfYear.
-! !
-
-!ObjectFactory methodsFor: 'object creation' stamp: 'JEC 6/11/2018 18:51:10'!
-incorrectMonthOfYearIntervalCreditCard
-
-	| aPersonName aCreditCardNumber aFromMonthOfYear aToMonthOfYear |
-
-	aPersonName _ 'a person name'.
-	aCreditCardNumber _ '0000000000000000'.
-	aFromMonthOfYear _ Month month: 01 year: 2020.
-	aToMonthOfYear _ Month month: 01 year: 2018.
-
-	^ CreditCard of: aPersonName with: aCreditCardNumber from: aFromMonthOfYear to: aToMonthOfYear.
-! !
+	^ CreditCard of: aPersonName with: aCreditCardNumber expirationDate: anExpiredExpirationDate.! !
 
 !ObjectFactory methodsFor: 'object creation' stamp: 'JEC 6/11/2018 18:51:19'!
 invalidBook
 
 	^'an invalid book'.! !
 
+!ObjectFactory methodsFor: 'object creation' stamp: 'JEC 6/18/2018 00:27:32'!
+merchantProcessorSimulator
+
+	^MerchantProcessorSimulator new.! !
+
 !ObjectFactory methodsFor: 'object creation' stamp: 'JEC 6/11/2018 18:51:24'!
 validBook
 
 	^'a valid book'.! !
 
-!ObjectFactory methodsFor: 'object creation' stamp: 'JEC 6/11/2018 18:51:32'!
+!ObjectFactory methodsFor: 'object creation' stamp: 'JEC 6/18/2018 01:22:51'!
 validCreditCard
 
-	| aPersonName aCreditCardNumber aFromMonthOfYear aToMonthOfYear |
+	"Valid in respect of the Calendar Mock"
 
-	aPersonName _ 'a person name'.
+	| aPersonName aCreditCardNumber anExpirationDate |
+
+	aPersonName _ 'a client name'.
 	aCreditCardNumber _ '0000000000000000'.
-	aFromMonthOfYear _ Month month: 01 year: 2018.
-	aToMonthOfYear _ Month month: 01 year: 2020.
+	anExpirationDate _ Month month: 01 year: 2020.
 
-	^ CreditCard of: aPersonName with: aCreditCardNumber from: aFromMonthOfYear to: aToMonthOfYear.! !
+	^ CreditCard of: aPersonName with: aCreditCardNumber expirationDate: anExpirationDate.! !
 
 
 !classDefinition: #Sale category: #TusLibros!
 Object subclass: #Sale
-	instanceVariableNames: 'booksWithQuantities totalPrice'
+	instanceVariableNames: 'booksWithQuantities totalPrice client'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
@@ -850,23 +1186,30 @@ booksWithQuantities
 
 	^booksWithQuantities copy.! !
 
+!Sale methodsFor: 'accessing' stamp: 'JEC 6/18/2018 00:53:08'!
+client
+
+	^client copy.! !
+
 !Sale methodsFor: 'accessing' stamp: 'JEC 6/10/2018 18:40:32'!
 totalPrice
 
 	^totalPrice copy.! !
 
 
-!Sale methodsFor: 'initialization' stamp: 'JEC 6/10/2018 18:14:37'!
-initializeWithBooks: someBooksWithTheirQuantities andPrice: aTotalPrice
+!Sale methodsFor: 'initialization' stamp: 'JEC 6/18/2018 00:52:11'!
+initializeFor: aClientId withBooks: someBooksWithTheirQuantities andPrice: aTotalPrice
 
+	client := aClientId.
 	booksWithQuantities := someBooksWithTheirQuantities.
 	totalPrice := aTotalPrice.! !
 
 
-!Sale methodsFor: 'private' stamp: 'JEC 6/10/2018 18:39:45'!
+!Sale methodsFor: 'private' stamp: 'JEC 6/18/2018 00:52:50'!
 = aSale
 
-	^self booksWithQuantities = aSale booksWithQuantities and: [ self totalPrice = aSale totalPrice ].! !
+	^self booksWithQuantities = aSale booksWithQuantities and: 
+		[ self totalPrice = aSale totalPrice and: [ self client = aSale client ] ].! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
@@ -874,7 +1217,7 @@ initializeWithBooks: someBooksWithTheirQuantities andPrice: aTotalPrice
 Sale class
 	instanceVariableNames: ''!
 
-!Sale class methodsFor: 'instance creation' stamp: 'JEC 6/10/2018 18:13:47'!
-with: someBooksWithTheirQuantities and: aTotalPrice
+!Sale class methodsFor: 'instance creation' stamp: 'JEC 6/18/2018 00:51:27'!
+for: aClientId with: someBooksWithTheirQuantities and: aTotalPrice
 
-	^self new initializeWithBooks: someBooksWithTheirQuantities andPrice: aTotalPrice.! !
+	^self new initializeFor: aClientId withBooks: someBooksWithTheirQuantities andPrice: aTotalPrice.! !
