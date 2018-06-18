@@ -1292,14 +1292,14 @@ validClientId
 
 	^'a client name'.! !
 
-!ObjectFactory methodsFor: 'object creation' stamp: 'JEC 6/18/2018 01:43:37'!
+!ObjectFactory methodsFor: 'object creation' stamp: 'JEC 6/18/2018 13:45:33'!
 validCreditCard
 
 	"Valid in respect of the Calendar Mock"
 
 	| aPersonName aCreditCardNumber anExpirationDate |
 
-	aPersonName _ self validCreditCard.
+	aPersonName _ self validClientId.
 	aCreditCardNumber _ '0000000000000000'.
 	anExpirationDate _ Month month: 01 year: 2020.
 
